@@ -1,0 +1,13 @@
+__pycache
+.vscode/
+R_To_JTR/
+R_To_JTR_MF_2/
+R_To_JTR_MF_4/
+R_To_T/
+SSN/
+TL/
+fusion/
+masking/
+new_fusion_orth copy/
+new_fusion_orth/
+subnetworks/
