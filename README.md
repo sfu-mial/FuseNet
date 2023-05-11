@@ -19,8 +19,16 @@ We show that an orthogonal multi-frequency DOT fusion can improve reconstruction
 ### Installation
 #### Local
 ```bash
-git clone git@github.com:haneneby/FuseNet.git  
+git clone https://github.com/haneneby/FuseNet.git  
 cd FuseNet
 conda env create -f requirements.yml --name FuseNetest
 conda activate FuseNetest
 ```
+## Cite
+```bibtext
+@article{ben2022orthogonal,
+  title={Orthogonal Multi-frequency Fusion Based Image Reconstruction and Diagnosis in Diffuse Optical Tomography},
+  author={Ben Yedder, Hanene and Cardoen, Ben and Shokoufi, Majid and Golnaraghi, Farid and Hamarneh, Ghassan},
+  year={2022},
+  publisher={TechRxiv}
+}
