@@ -14,3 +14,13 @@ We show that an orthogonal multi-frequency DOT fusion can improve reconstruction
    1. [Datasets](#data)
    2. [Preprocessing](#script)
 6. [FAQ](#faq)
+
+<a name="installation"></a>
+### Installation
+#### Local
+```bash
+git clone git@github.com:haneneby/FuseNet.git  
+cd FuseNet
+conda env create -f requirements.yml --name FuseNetest
+conda activate FuseNetest
+```
