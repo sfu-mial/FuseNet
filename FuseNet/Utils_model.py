@@ -79,7 +79,7 @@ def calculateDistance(image1, image2):
     from scipy.spatial import distance
     dist = distance.euclidean(y,x)
     return dist
-def psnr_torch(img1, img2):
+def psnr(img1, img2):
     """
     Assuming img2 is the ground truth, we take it's PIXEL_MAX
 
@@ -99,12 +99,12 @@ def psnr_torch(img1, img2):
         return 35
     psnr = 20 * math.log10(PIXEL_MAX / math.sqrt(mse))
     return psnr
-def psnr(img1, img2):
-    mse = np.mean( (img1 - img2) ** 2 )
-    if mse == 0:
-        return 100
+# def psnr(img1, img2):
+#     mse = np.mean( (img1 - img2) ** 2 )
+#     if mse == 0:
+#         return 100
 
-    return 20 * math.log10(PIXEL_MAX / math.sqrt(mse))
+#     return 20 * math.log10(PIXEL_MAX / math.sqrt(mse))
 
 def Dice (im1,im2):
     im1 = np.asarray(im1).astype(np.bool)

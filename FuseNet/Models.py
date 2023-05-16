@@ -268,13 +268,13 @@ def reconst_block(input, filters, initializers, shape):
     model = Activation('relu')(model)
     return model
 
-class Generator(object):
+class Models(object):
 
     def __init__(self, noise_shape):
         
         self.noise_shape = noise_shape
 
-    def generator(self):
+    def JRD(self):
 	    target_shape = [128, 128,1]
 	    normal=keras.initializers.he_normal(seed=None)
 
