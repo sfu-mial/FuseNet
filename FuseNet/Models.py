@@ -21,7 +21,7 @@ class Models(object):
         
         self.input_shape = input_shape
 
-    def JRD(self):
+    def JRD_model(self):
 	    target_shape = [128, 128,1]
 	    normal=keras.initializers.he_normal(seed=None)
 
@@ -72,6 +72,35 @@ class Models(object):
         '''Task_branch'''
 	
 	    feature_clas,  out_r_task = diagnosis_block(out_r_fuse, 64, 3, 1)
+
+	    generator_model = Model(inputs = [input0, input1, input2, input3],  outputs = [out_r_task,out_r1, out_r2, out_r3, out_r4,out_r_fuse])
+	    generator_model.summary([])
+	    return feature_clas, generator_model
+
+        def RTT_model(self):
+	    target_shape = [128, 128,1]
+	    normal=keras.initializers.he_normal(seed=None)
+
+        ''' Add noise '''
+	    input0 = keras.Input(shape = self.input_shape, name="vec1")
+	    input0_n = GaussianNoise(0.1)(input0)
+
+	    input1 = keras.Input(shape = self.input_shape, name="vec2")
+	    input1_n = GaussianNoise(0.1)(input1)#0.01
+
+	    input2 = keras.Input(shape = self.input_shape, name="vec3")
+	    input2_n = GaussianNoise(0.1)(input2)
+        
+	    input3 = keras.Input(shape = self.input_shape, name="vec4")
+	    input3_n = GaussianNoise(0.1)(input3)
+
+        ''' Fuse #freqs '''
+	    gen_input =Fusion(input0_n, input1_n, input2_n, input3_n)
+
+       
+        '''Task_branch'''
+	
+	    feature_clas,  out_r_task = diagnosis_block(gen_input, 64, 3, 1)
 
 	    generator_model = Model(inputs = [input0, input1, input2, input3],  outputs = [out_r_task,out_r1, out_r2, out_r3, out_r4,out_r_fuse])
 	    generator_model.summary([])

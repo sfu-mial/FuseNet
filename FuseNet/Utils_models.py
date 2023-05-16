@@ -16,9 +16,6 @@ from keras import backend as K
 from keras.utils.vis_utils import plot_model
 
 
-    
-
-
 def squeeze_excite_channel_wise_block(input, ratio=16):
     ''' Create a squeeze-excite block
     Args:
