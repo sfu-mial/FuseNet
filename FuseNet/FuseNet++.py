@@ -1,53 +1,29 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Feb  4 14:15:31 2019
-This will free the gpu memory.
-find running process
-sudo fuser -v /dev/nvidia*
-and kill the python or code PID using
-sudo kill -9 "PID code here".
 
-@author: HKhanene
-"""
 from sklearn.preprocessing import StandardScaler
 import os
+import LoadData as a
+from Models import *
+from Utils_metrics import *
+import tensorflow as tf
 os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
 import itertools
 import pandas as pd
 from sklearn import preprocessing
-# from Network_MLP import Generator, Discriminator
-from Network_transformer import Generator
-
+from Models import *
 from keras.utils import np_utils
-
-#import data_in as a
-# import Utilsnew as a
-import Utilsnew as a
-# import Utilsnew_refined as a
-from Utils_model import VGG_LOSS,calculateDistance, Dice, FuzzyJaccard,psnr_torch,CustomSchedule
 from keras import losses
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-
-import matplotlib.pyplot as plt
-plt.switch_backend('agg')
 from keras.applications.vgg19 import VGG19
 from keras.layers.convolutional import UpSampling2D
 from keras.models import Model
-# from keras.optimizers import adam
-
 from tensorflow.keras.optimizers import SGD, Adam, RMSprop
 import keras
 import keras.backend as K
 from keras.layers import Lambda, Input
-import tensorflow as tf
+
 from sklearn.metrics import mean_squared_error
-#import skimage.transform
-#from skimage import data, io, filters
 import numpy as np
 from numpy import array
-#from skimage.transform import rescale, resize
-#from scipy.misc import imresize
 from sklearn.metrics import jaccard_score
 import skimage
 print(skimage.__version__)
@@ -56,24 +32,20 @@ import os
 from sklearn.preprocessing import MinMaxScaler
 import keras  as keras
 import matplotlib
+import matplotlib.pyplot as plt
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from keras.callbacks import LearningRateScheduler
 from keras.models import load_model
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
-# from keras.utils import multi_gpu_model
-#import cv2
 import timeit
 import math
 from sklearn.metrics import jaccard_score
 from sklearn.metrics import classification_report, confusion_matrix
-
 from tensorflow.python.framework.ops import disable_eager_execution
 disable_eager_execution()
 
-# from skimage.measure import compare_ssim as ssim
-#import skimage.filters as filter
-#from skimage.filters import threshold_local
+
 
 import logging
 FORMAT = "[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
@@ -83,7 +55,6 @@ logger.setLevel(logging.INFO)
 
 from numpy.random import seed
 seed(1)
-# from tensorflow import set_random_seed # no need 
 tf.random.set_seed(2)
 
 image_shape =  (128,128,1)
@@ -98,16 +69,7 @@ current_directory = os.getcwd()
 final_directory = os.path.join(current_directory, 'results')
 if not os.path.exists(final_directory):
    os.makedirs(final_directory)
-def nean_std_data(x):
-    mvec = x.mean(0)
-    stdvec = x.std(axis=0) 
-    return mvec, stdvec#,mvec,stdvec
-def preprocess_image(x):
-    return np.divide(x.astype(np.float32), 23.)
 
-def deprocess_image(x):
-    x = np.clip(x*23, 0, 23)
-    return x
 class LearningRateReducerCb(tf.keras.callbacks.Callback):
 
   def on_epoch_end(self, epoch, logs={}):
@@ -153,7 +115,6 @@ class PlotLosses(keras.callbacks.Callback):
         self.val_acc.append(logs.get('val_category_output_accuracy'))
         self.i += 1
         
-
         # clear_output(wait=True)
         plt.plot(self.x, self.losses_task, label="loss")
         plt.plot(self.x, self.val_losses_task, label="val_loss")
@@ -167,7 +128,6 @@ class PlotLosses(keras.callbacks.Callback):
         plt.xlabel('epoch')
         plt.savefig("results/model_task_loss.png", bbox_inches='tight')
         plt.close("all")
-
 
         # clear_output(wait=True)
         plt.plot(self.x, self.losses_recons, label="losses_recons")
@@ -211,6 +171,7 @@ class MyCallback(keras.callbacks.Callback):
 #                  K.set_value(self.beta,  min(0.7, K.get_value(self.beta) -0.0001))
         logger.info("epoch %s, alpha = %s, beta = %s" % (epoch, K.get_value(self.alpha), K.get_value(self.beta)))
 
+
 def focal_loss(gamma=5., alpha=.25): # binary only
 	def focal_loss_fixed(y_true, y_pred):
 		pt_1 = tf.where(tf.equal(y_true, 1), y_pred, tf.ones_like(y_pred))
@@ -218,49 +179,20 @@ def focal_loss(gamma=5., alpha=.25): # binary only
 		return -K.mean(alpha * K.pow(1. - pt_1, gamma) * K.log(pt_1+K.epsilon())) - K.mean((1 - alpha) * K.pow(pt_0, gamma) * K.log(1. - pt_0 + K.epsilon()))
 	return focal_loss_fixed
 
-# def OrthogonalProjectionLoss(features,labels, batch_size, gamma=0.5):
-#         size = tf.shape(features)[0]
-#         l=np.array([0,1,2,3])
-#         ll= np_utils.to_categorical(l, 4)
-
-#         lab=ll
-#         print("l {.shape}".format(l))
-#         for i in range (size):
-#             tf.autograph.experimental.set_loop_options(
-#         shape_invariants=[(lab, tf.TensorShape([None,4]))]
-#     )
-#             lab= K.tf.concat((lab, ll), 0)
-#         print("lab {.shape}".format(lab))
-
-#         #  features are normalized
-#         features = K.tf.math.l2_normalize(features, 1)#F.normalize(features, p=2, dim=1)
-#         print("features {.shape}".format(features))
-
-#         lab = K.tf.expand_dims(lab,2) #labels[:, None]  # extend dim
-#         print("labels {.shape}".format(lab))
-
-#         mask= (K.tf.equal(lab,K.transpose (lab)))  #torch.eq(labels, labels.t()).bool().to(device)
-#         print("mask {.shape}".format(mask))
-#         eye= tf.cast(K.tf.eye(tf.shape(mask)[0],4), tf.bool)
-#         eye_t= ~eye
-#         # eye =K.tf.eye(batch_size])# torch.eye(mask.shape[0], mask.shape[1]).bool().to(device)
-#         print("eye {.shape}".format(eye))
-#         mask_pos = tf.cast(tf.linalg.set_diag( mask, eye_t), tf.float32)#(mask,eye, tf.zeros_like(eye))#, eye)#mask.masked_fill(eye, 0).float()
-#         print("mask_pos {.shape}".format(mask_pos))
-#         mask_neg = tf.cast((~mask), tf.float32)
-#         print("mask_neg {.shape}".format(mask_neg))
-#         dot_prod =K.dot(features, K.transpose (features))
-#         print("dot_prod {.shape}".format(dot_prod))
-#         # dot_prod = K.tf.expand_dims(dot_prod,2) 
-#         pos_pairs_mean = K.sum(tf.linalg.matmul (mask_pos , dot_prod)) / K.sum (mask_pos + 1e-6)
-#         print("pos_pairs_mean {.shape}".format(pos_pairs_mean))
-
-#         neg_pairs_mean = K.sum(tf.matmul(mask_neg , dot_prod))/ K.sum(mask_neg + 1e-6)
-#         print("neg_pairs_mean {.shape}".format(neg_pairs_mean))
-#         loss = (1.0 - pos_pairs_mean) + gamma * neg_pairs_mean
-#         print("loss {.shape}".format(loss))
-
-#         return loss
+def FuzzyJaccard_distance_loss(y_true, y_pred,  n_channels=1):
+ 	jac = 0
+ 	for c in range(n_channels):
+            true_batch_c = y_true[:, :, :, c]
+            pred_batch_c = y_pred[:, :, :, c]
+            intersect_batch = (K.minimum(true_batch_c, pred_batch_c))
+            union_batch = (K.maximum(true_batch_c, pred_batch_c))
+            intersect = K.sum(K.sum(intersect_batch, axis=-1), axis=-1)
+            union = K.sum(K.sum(union_batch, axis=-1), axis=-1)
+            j = intersect / union
+            jac += K.mean(j)
+ 	union= jac / n_channels
+ 	union= (-K.log(K.clip(union, K.epsilon(), None) )) #**0.3
+ 	return union # (1- union )
 def OrthogonalProjectionLoss(features,labels, batch_size, gamma=0.5):
         size = tf.shape(labels)[0]
 
@@ -293,46 +225,6 @@ def OrthogonalProjectionLoss(features,labels, batch_size, gamma=0.5):
         print("loss {.shape}".format(loss))
 
         return loss
-def binary_focal_loss(gamma=2., alpha=.25):
-    ##https://github.com/umbertogriffo/focal-loss-keras
-    """
-    Binary form of focal loss.
-      FL(p_t) = -alpha * (1 - p_t)**gamma * log(p_t)
-      where p = sigmoid(x), p_t = p or 1 - p depending on if the label is 1 or 0, respectively.
-    References:
-        https://arxiv.org/pdf/1708.02002.pdf
-    Usage:
-     model.compile(loss=[binary_focal_loss(alpha=.25, gamma=2)], metrics=["accuracy"], optimizer=adam)
-    """
-
-    def binary_focal_loss_fixed(y_true, y_pred):
-        """
-        :param y_true: A tensor of the same shape as `y_pred`
-        :param y_pred:  A tensor resulting from a sigmoid
-        :return: Output tensor.
-        """
-        y_true = tf.cast(y_true, tf.float32)
-        # Define epsilon so that the back-propagation will not result in NaN for 0 divisor case
-        epsilon = K.epsilon()
-        # Add the epsilon to prediction value
-        # y_pred = y_pred + epsilon
-        # Clip the prediciton value
-        y_pred = K.clip(y_pred, epsilon, 1.0 - epsilon)
-        # Calculate p_t
-        p_t = tf.where(K.equal(y_true, 1), y_pred, 1 - y_pred)
-        # Calculate alpha_t
-        alpha_factor = K.ones_like(y_true) * alpha
-        alpha_t = tf.where(K.equal(y_true, 1), alpha_factor, 1 - alpha_factor)
-        # Calculate cross entropy
-        cross_entropy = -K.log(p_t)
-        weight = alpha_t * K.pow((1 - p_t), gamma)
-        # Calculate focal loss
-        loss = weight * cross_entropy
-        # Sum the losses in mini_batch
-        loss = K.mean(K.sum(loss, axis=1))
-        return loss
-
-    return binary_focal_loss_fixed
 
 
 def categorical_focal_loss(y_true, y_pred,alpha, gamma=2.):
@@ -382,125 +274,7 @@ def categorical_focal_loss(y_true, y_pred,alpha, gamma=2.):
     # Compute mean loss in mini_batch
     return K.mean(K.sum(loss, axis=-1))
 
-    # return categorical_focal_loss_fixed
-def FuzzyJaccard_distance_loss(y_true, y_pred,  n_channels=1):
- 	jac = 0
- 	for c in range(n_channels):
-            true_batch_c = y_true[:, :, :, c]
-            pred_batch_c = y_pred[:, :, :, c]
-            intersect_batch = (K.minimum(true_batch_c, pred_batch_c))
-            union_batch = (K.maximum(true_batch_c, pred_batch_c))
-            intersect = K.sum(K.sum(intersect_batch, axis=-1), axis=-1)
-            union = K.sum(K.sum(union_batch, axis=-1), axis=-1)
-            j = intersect / union
-            jac += K.mean(j)
- 	union= jac / n_channels
- 	union= (-K.log(K.clip(union, K.epsilon(), None) )) #**0.3
- 	return union # (1- union )
 
-#def centroideloss(y_true, y_pred):
-#    true_batch_c = y_true[:, :, :, 1]
-#    pred_batch_c = y_pred[:, :, :, 1]
-#
-#    #mask image by thresholding over the mean
-#    true_batch_thre = y_true[y_true>K.meam(y_true)]
-#    pred_batch_thre = y_pred[y_pred>K.meam(y_pred)]
-#    # find min and max per image
-#    minx_pred_batch_thre= K.min(pred_batch_thre , axis=0)
-#    maxx_pred_batch_thre= K.max(pred_batch_thre , axis=0)
-#    miny_pred_batch_thre= K.min(pred_batch_thre , axis=1)
-#    maxy_pred_batch_thre= K.max(pred_batch_thre , axis=1)
-#
-#    minx_true_batch_thre= K.min(true_batch_thre , axis=0)
-#    maxx_true_batch_thre= K.max(true_batch_thre , axis=0)
-#    miny_true_batch_thre= K.min(true_batch_thre , axis=1)
-#    maxy_true_batch_thre= K.max(true_batch_thre , axis=1)
-#
-#    centroid_pred= [(maxx_pred_batch_thre-minx_pred_batch_thre)/2. , (maxy_pred_batch_thre-miny_pred_batch_thre)/2.]
-#    centroid_true= [(maxx_true_batch_thre-minx_true_batch_thre)/2. , (maxy_true_batch_thre-miny_true_batch_thre)/2.]
-#    return losses.mean_squared_error(centroid_pred, centroid_true)
-#
-def grad( y, x ):
-    return Lambda( lambda z: K.gradients( z[ 0 ], z[ 1 ] ), output_shape = [0] )( [ y, x ] )
-
-def second_derivative(y_true, y_pred):   
-    loss=0
-    size= K.int_shape(y_true)[0]
-    if (size is None):
-        size= 1
-        print("here")
-    for i in range(size):
-        
-        true_batch_c = K.tf.squeeze(y_true[i, :, :,:])
-        pred_batch_c = K.tf.squeeze(y_pred[i, :, :,:])
-
-        L1_Distance= K.mean(K.sum(K.abs(laplacian_of_gaussian(true_batch_c, 5,1) - laplacian_of_gaussian(pred_batch_c, 5,1)), axis=-1), axis=-1)/(128)      #, axis=-1)/(128*128*2) #K.sqrt(K.sum(K.square(result_true - result_pred), axis=-1))
-        loss += L1_Distance
-    return loss/ size
-
-def laplacian(image, size):
-#    if len(image.shape)==3 and image.shape[2]==3: # convert rgb to grayscale
-#        image = tf.image.convert_image_dtype(image, tf.dtypes.float32)
-#        image = tf.image.rgb_to_grayscale(image)
-#        image = tf.image.convert_image_dtype(image, tf.dtypes.float32)
-#        image = tf.squeeze(image,2)
-#    
-#    image = K.tf.convert_to_tensor(image, dtype=tf.float32)
-
-#    new = K.tf.image.convert_image_dtype(image, tf.dtypes.float32)
-    new = K.tf.expand_dims(image,2)
-    image = K.tf.expand_dims(new,0)
-    
-    fil = np.ones([size, size])
-    fil[int(size/2), int(size/2)] = 1.0 - size**2
-    fil = K.tf.convert_to_tensor(fil, tf.float32)
-    fil = K.tf.stack([fil]*1, axis=2)
-    fil = K.tf.expand_dims(fil, 3)
-    print("fil {.shape}".format(fil))
-    print("image {.shape}".format(image))
-
-
-    result = K.tf.nn.depthwise_conv2d(image, fil, strides=[1, 1, 1, 1], padding="SAME")
-    result = K.tf.squeeze(result,0)
-    result = K.tf.squeeze(result,2)
-    
-#    result = result.numpy()
-    minM = K.min(result,axis=-1) # np.min(result)
-    maxM = K.max(result,axis=-1)#np.max(result)
-    output = (result - minM) / (maxM - minM)
-    return output
-
-def laplacian_of_gaussian(image, filtersize, sigma):
-
-    n_channels = 1
-    image = K.tf.expand_dims(image, 2)
-    
-    w = math.ceil(sigma * filtersize)
-    w_range = int(math.floor(w/2))
-
-    y = x = K.tf.range(-w_range, w_range+1, 1)
-    Y, X = K.tf.meshgrid(x, y)
-    z = K.tf.cast(tf.add(tf.square(X), tf.square(Y)),tf.float32)
-    nom = K.tf.subtract(z, 2*(sigma**2))
-    denom = 2*math.pi*(sigma**6)
-    exp = K.tf.exp( -z/2*(sigma**2))
-    fil = K.tf.divide(tf.multiply(nom, exp), denom)
-    
-    fil =K. tf.stack([fil]*n_channels, axis=2)
-    fil = K.tf.expand_dims(fil, 3)
-    
-#    new = tf.image.convert_image_dtype(image, tf.dtypes.float32)
-    new = K.tf.expand_dims(image, 0)
-    res = K.tf.nn.depthwise_conv2d(new, fil, strides=[1, 1, 1, 1], padding="SAME")
-    res = K.tf.squeeze(res,0)
-    res = K.tf.squeeze(res,2)
-    
-#    result = res.numpy()
-    minM = K.min(res,axis=-1) #np.min(result)
-    maxM = K.max(res,axis=-1)#np.max(result)
-    output = (res- minM) / (maxM - minM)
-    return output
-        
 def dst_transform(y_true, y_pred):   
     loss=0
     size= K.int_shape(y_true)[0]
@@ -564,10 +338,6 @@ def dst_transform(y_true, y_pred):
         result_p = dist_trans_pred + K.tf.sparse.to_dense(delta_pred)
         result_pred = K.tf.cond(is_empty_pre, lambda: dist_trans_pred, lambda: result_p/128)
     
-#        L2_Distance= K.sum(K.mean(K.square(result_true - result_pred), axis=-1), axis=-1)/(128*128*2)
-#        L2_Distance= K.sqrt(K.sum(K.square(result_true - result_pred), axis=-1))       #, axis=-1)/(128*128*2) #K.sqrt(K.sum(K.square(result_true - result_pred), axis=-1))
-
-#        L1_Distance= K.mean(K.sum(K.abs(K.maximum(K.cast(0,dtype="float32"),result_true - result_pred)), axis=-1), axis=-1)/(128)      #, axis=-1)/(128*128*2) #K.sqrt(K.sum(K.square(result_true - result_pred), axis=-1))
         L1_Distance= K.mean(K.sum(K.abs(result_true - result_pred), axis=-1), axis=-1)/(128)      #, axis=-1)/(128*128*2) #K.sqrt(K.sum(K.square(result_true - result_pred), axis=-1))
 
         loss += L1_Distance
@@ -579,11 +349,6 @@ def loss(alpha, Beta,batch_size,feature, gamma):
     return custom_loss_func
 
 
-# def custom_loss(y_true, y_pred):
-# #    alpha=0.999995
-#     loss =1*losses.mean_squared_error(y_true, y_pred)# was 1*   mean_squared_error
-#     loss+= 0.3*FuzzyJaccard_distance_loss(y_true, y_pred)# was 0.4, 0.3
-#     return  loss
 def weighted_categorical_crossentropy(y_true, y_pred,weights):
     """
     A weighted version of keras.objectives.categorical_crossentropy
@@ -607,9 +372,8 @@ def weighted_categorical_crossentropy(y_true, y_pred,weights):
     # calc
     loss = y_true * K.log(y_pred) * weights
     loss = -K.sum(loss, -1)
-    # return loss
-    
     return loss
+
 def custom_loss(y_true, y_pred, alpha, Beta,batch_size,feature, gamma):
     # loss =losses.mean_squared_error(y_true, y_pred)# was 1*   mean_squared_error
 
@@ -636,131 +400,6 @@ def normalize_data(values):
     normalized = scaler.transform(values)
     return normalized
 
-
-def minmax_normalization(x):
-	scaler = MinMaxScaler()
-
-	MinMax = scaler.fit(x)
-	MinMax_XEAS= scaler.transform(x)
-
-	return MinMax_XEAS , MinMax
-
-def minmax_normalization_ref(x,scaler):
-#	MinMax = scaler.fit(x)
-	MinMax_XEAS= scaler.transform(x)
-	return MinMax_XEAS
-
-
-def total_variation_loss(x):
-    assert 4 == K.ndim(x)
-
-    img_nrows=128
-    img_ncols=128
-    if K.image_dim_ordering() == 'th':
-        a = K.square(x[:, :, :img_nrows-1, :img_ncols-1] - x[:, :, 1:, :img_ncols-1])
-        b = K.square(x[:, :, :img_nrows-1, :img_ncols-1] - x[:, :, :img_nrows-1, 1:])
-    else:
-        a = K.square(x[:, :img_nrows-1, :img_ncols-1, :] - x[:, 1:, :img_ncols-1, :])
-        b = K.square(x[:, :img_nrows-1, :img_ncols-1, :] - x[:, :img_nrows-1, 1:, :])
-    loss= K.sum(K.pow(a + b, 1.25))
-    return loss
-
-def normalized_intensity(actualscan):
-
-    max_actuali = np.max(actualscan[:,0:128], axis=1); #max value of each row where a row is source (i/ii) measurmenent for a given frequency
-    max_actualii = np.max(actualscan[:,128:], axis=1); #max value of each row where a row is source (i/ii) measurmenent for a given frequency
-
-    min_actuali = np.min(actualscan[:,0:128], axis=1); ##min value of each row
-    min_actualii = np.min(actualscan[:,128:], axis=1); ##min value of each row
-
-
-    minmaxi=(max_actuali - min_actuali).reshape((actualscan[:,0:128] .shape[0],1))
-    minmaxii=(max_actualii - min_actualii).reshape((actualscan[:,128:].shape[0],1))
-
-
-    normalized_intensityi =np.divide((actualscan[:,0:128] - min_actuali.reshape((actualscan[:,0:128] .shape[0],1))) ,minmaxi)
-    normalized_intensityii =np.divide((actualscan[:,128:] - min_actualii.reshape((actualscan[:,0:128] .shape[0],1))) ,minmaxii)
-    #    normalized_intensity= normalized_intensityi+ normalized_intensityii
-    normalized_intensity= np.concatenate((normalized_intensityi, normalized_intensityii), axis=1)  		#normalized_intensityi+ normalized_intensityii
-
-
-    return normalized_intensity
-
-def vgg_loss(y_true, y_pred):
-
-#    vgg19 = VGG19(include_top=False, weights='imagenet', input_shape=image_shape)
-#    vgg19.trainable = False
-#    for l in vgg19.layers:
-#        l.trainable = False
-#    loss_model = Model(inputs=vgg19.input, outputs=vgg19.get_layer('block5_conv4').output)
-#    loss_model.trainable = False
-#    return K.mean(K.square(loss_model(y_true) - loss_model(y_pred)))
-    vgg19= load_model('./autoencoder/deep_spa_l2f3x3l90.h5')# Pretrained model on SA and JK
-
-#    vgg19 = VGG19(include_top=False, weights='imagenet', input_shape=image_shape)
-    vgg19.trainable = False
-    for l in vgg19.layers:
-        l.trainable = False
-    loss_model = Model(inputs=vgg19.input, outputs=vgg19.get_layer('conv4').output)
-    loss_model.trainable = False
-    return K.mean(K.square(loss_model(y_true) - loss_model(y_pred)))
-
-def get_network(shape, generator, optimizer):
-    gan_input = Input(shape=(1024,))
-    x = generator(gan_input)
-    gan = Model(inputs=gan_input, outputs=x)
-#    gan.compile(loss='mse', # customerloss# vgg_loss
-                #loss_weights=[1, 1e-3 ],# 1, 1e-3
-#                optimizer=optimizer)
-
-# def plot_generated_images(epoch,generator, val =True, examples=5, dim=(1, 2), figsize=(10, 5)):
-#     DistanceROI = []
-#     mselist=[]
-#     psnrlist=[]
-#     ssimlist=[]
-#     Dicelist= []
-#     FJaccard=[]
-#     label=[]
-#     GT_label=[]
-#     vmin=0
-#     vmax=25
-#     global Tmp_ssimlist
-#     if (val ==True):
-#         # rand_nums = np.random.randint(0, x_test_hr.shape[0], size=examples)
-#         image_batch_hr = x_test_hr
-#         image_batch_lr = x_test_lr#0:25
-#         img =y_testima[:,:]
-#         examples=len(x_test_hr)#
-#         dirfile='results/test_generated_image_epoch_'
-    
-#     generated_image = generator.predict(image_batch_lr)
-# #    generated_image = denormalize(gen_img)
-# #    image_batch_lr = denormalize(image_batch_lr)
-
-#     #generated_image = deprocess_HR(generator.predict(image_batch_lr))
-#     for index in range(examples):
-#             if (val==False):
-#              image_batch_hr[index]=(image_batch_hr[index]).reshape(128, 128)
-#             fig=plt.figure(figsize=figsize)
-
-#             ax1=plt.subplot(dim[0], dim[1], 1)
-#             imgn = img[index] #/ np.linalg.norm(image_batch_hr[index])
-#             im1 = ax1.imshow(imgn.reshape(128, 128))  # , interpolation='nearest')
-#             divider = make_axes_locatable(ax1)
-#             cax = divider.append_axes('right', size='5%', pad=0.05)
-#             fig.colorbar(im1, cax=cax, orientation='vertical')
-#             label.append(generated_image)
-#             GT_label.append(x_test_hr)
-
-#             plt.close("all")
-
-#     loss_file = open('results/losses.txt' , 'a')
-#     if (val == True):
-#         loss_file.write('synthe  epoch%d :  GT_label = %s ; label = %s  \n' %(epoch, GT_label, label ) )
-#     # if Tmp_ssimlist<ssim_mean:
-#     #     generator.save('./mse/ModelCheckpoint.h5')
-#     #     print('ssim improved from %s to %s, saving model to weight\n' %(Tmp_ssimlist, ssim_mean))
-#     #     Tmp_ssimlist = ssim_mean
 def plot_generated_images(epoch,generator, val =True, examples=5, dim=(1, 6), figsize=(10, 5)):
     fg_color = 'black'
     bg_color =  'white'
@@ -875,7 +514,7 @@ def plot_generated_images(epoch,generator, val =True, examples=5, dim=(1, 6), fi
             DistanceROI.append(v)
 #            mse=mean_squared_error(a,b)
 #            mselist.append(mse)
-            p=psnr_torch(generated_image_f[index],image_batch_hr[index])#(y_te[i],decoded_imgs[i].reshape(128, 128)) #(a.reshape(128, 128),b)#
+            p=psnr(generated_image_f[index],image_batch_hr[index])#(y_te[i],decoded_imgs[i].reshape(128, 128)) #(a.reshape(128, 128),b)#
             psnrlist.append(p)
             ss_im = ssim(image_batch_hr[index].reshape(128, 128), generated_image_f[index].reshape(128, 128))
             ssimlist.append(ss_im)
@@ -1068,19 +707,10 @@ def train(epochs=1, batch_size=64):
     Tmp_ssimlist = 0
 
     shape = (256,)
-    get_feat=1
-    feature, feature_cla, generator = Generator(shape).generator()
-#    discriminator = Discriminator(image_shape).discriminator()
-    # sgd = SGD(lr=0.001, momentum=0.9, decay=1e-4)# momentum=0.8, decay=1e-6)
+    feature_cla, model = Models(shape).JRD_model()
     adam = Adam(lr=1E-4, beta_1=0.9, beta_2=0.999, epsilon=1e-08,amsgrad=True)#,clipvalue=1.0) # was r=1E-5 here
-#    Nadam=keras.optimizers.Nadam(lr=0.002, beta_1=0.9, beta_2=0.999)
     model_loss_fuse= loss(alpha, beta,batch_size,feature_cla,gamma)#feature_cla
     model_loss= loss_r(alpha, beta,batch_size) 
-#    model=generator
-#     generator= load_model('SA_only/deep_spa_l2f3x3l200.h5')# Pretrained model on SA and JK
-# #
-#    model = multi_gpu_model(generator, gpus=4)
-    model=generator
     model.compile(    loss = {
         "category_output":
          model_loss_fuse,
