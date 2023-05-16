@@ -2,7 +2,6 @@
 # Modules
 from keras.layers import Dense
 from keras.layers.core import Activation
-# from keras.layers.normalization import BatchNormalization
 from keras.layers.convolutional import UpSampling2D
 from keras.layers.core import Flatten
 from keras.layers import Input
@@ -12,12 +11,10 @@ from keras.layers.advanced_activations import LeakyReLU, PReLU
 from keras.layers import add
 import keras  as keras
 from keras.layers import *
-
 from keras.layers import GlobalAveragePooling2D, Reshape, multiply, Permute
 from keras import backend as K
 from keras.utils.vis_utils import plot_model
-# from tensorflow.keras.models import *
-# Residual block
+
 def Fusion(vec1, vec2, vec3,vec4):
     skip= 1,
     dim=32
@@ -36,22 +33,17 @@ def Fusion(vec1, vec2, vec3,vec4):
     mmhid=96, 
     dropout_rate=0.25
     
-    # skip_dim = dim1+dim2+dim3+3 if skip else 0
-
     ### Gated Multimodal Units
     if gate1:
         h1 = Dense(dim, activation = 'relu')(vec1)
-        print("gate attention vec1-vec2")
-
         fuse = tf.keras.layers.Concatenate(axis=1)([vec2, vec3,vec4])
-        z1 = Dense(dim)(fuse) # Gate Path with Omic
+        z1 = Dense(dim)(fuse) # Gate Path 
         z1 = Activation('sigmoid')(z1) 
-        multi= z1* h1# tf.keras.layers.Multiply()([z1, h1])
+        multi= z1* h1
         
         o1 = Dense( dim, activation = 'relu')(multi)
         o1= Dropout(ratio)(o1)
     else:
-        print("Noooo gate attention vec1-vec2")
 
         o1 = Dense( dim, activation = 'relu')(vec1)
         o1= Dropout(ratio)(o1)
@@ -63,7 +55,7 @@ def Fusion(vec1, vec2, vec3,vec4):
         z2 = Dense(dim)(fuse2) # Gate Path with Omic
         z2 = Activation('sigmoid')(z2) 
 
-        multi2= z2* h2#tf.keras.layers.Multiply()([z2, h2])
+        multi2= z2* h2
         o2 = Dense( dim, activation = 'relu')(multi2)
         o2= Dropout(ratio)(o2)
     else:
@@ -74,9 +66,9 @@ def Fusion(vec1, vec2, vec3,vec4):
         h3 = Dense(dim, activation = 'relu')(vec3)
 
         fuse3 = tf.keras.layers.Concatenate(axis=1)([vec1, vec2, vec4])
-        z3 = Dense(dim)(fuse3) # Gate Path with Omic
+        z3 = Dense(dim)(fuse3) # Gate Path
         z3 = Activation('sigmoid')(z3) 
-        multi3=  z3*h3#tf.keras.layers.Multiply()([z3, h3])
+        multi3=  z3*h3
         o3 = Dense( dim, activation = 'relu')(multi3)
         o3= Dropout(ratio)(o3)
     else:
@@ -89,7 +81,7 @@ def Fusion(vec1, vec2, vec3,vec4):
         fuse4 = tf.keras.layers.Concatenate(axis=1)([vec1, vec2, vec3])
         z4 = Dense(dim)(fuse4) #
         z4 = Activation('sigmoid')(z4) 
-        multi4=z4*h4#tf.keras.layers.Multiply()([z4, h4])
+        multi4=z4*h4
         o4 = Dense( dim, activation = 'relu')(multi4)
         o4= Dropout(ratio)(o4)
     else:
@@ -97,14 +89,14 @@ def Fusion(vec1, vec2, vec3,vec4):
         o4= Dropout(ratio)(o4)
 
     ### Fusion
- 
+
     print("dists {.shape}".format(o1))
     print("dists {.shape}".format(o2))
     print("dists {.shape}".format(o3))
 
-    one_tens1= K.tf.ones ((K.tf.shape(o1)[0],1),dtype='float32')#(128,128)
-    one_tens2= K.tf.ones ((K.tf.shape(o2)[0],1),dtype='float32')#(128,128)
-    one_tens3= K.tf.ones ((K.tf.shape(o3)[0],1),dtype='float32')#(128,128)
+    one_tens1= K.tf.ones ((K.tf.shape(o1)[0],1),dtype='float32')
+    one_tens2= K.tf.ones ((K.tf.shape(o2)[0],1),dtype='float32')
+    one_tens3= K.tf.ones ((K.tf.shape(o3)[0],1),dtype='float32')
     print("dists_ones {.shape}".format(one_tens1))
 
     o1= Concatenate(axis=1)([o1,  one_tens1])
@@ -122,7 +114,6 @@ def Fusion(vec1, vec2, vec3,vec4):
     o2 =tf.expand_dims(o2, 1)
     print("distso2{.shape}".format(o2))
 
-    # o12= tf.keras.layers.Dot(axes=(2, 1))([o1, o2])
     o12= tf.keras.layers.Multiply()([o1, o2])
 
     print("distso12{.shape}".format(o12))
@@ -135,7 +126,6 @@ def Fusion(vec1, vec2, vec3,vec4):
     o3 =tf.expand_dims(o3, 1)
     print("distso3{.shape}".format(o3))
 
-    # o123 = tf.keras.layers.Dot(axes=(2, 1))([o12, o3])
     o123 = tf.keras.layers.Multiply()([o12, o3])
 
     print("distsoo123{.shape}".format(o123))
@@ -147,7 +137,6 @@ def Fusion(vec1, vec2, vec3,vec4):
     print("distso123{.shape}".format(o123))
     o4 =tf.expand_dims(o4, 1)
     print("dists_o4 {.shape}".format(o4))
-    # o1234 = tf.keras.layers.Dot(axes=(2, 1))([o123, o4])
     o1234 = tf.keras.layers.Multiply()([o123, o4])
 
     print("distsoo1234{.shape}".format(o1234))
@@ -168,7 +157,7 @@ def Fusion(vec1, vec2, vec3,vec4):
     out = Dense(128, activation = 'relu')(out)
     out =  Dropout(ratio, name="fusion")(out)
 
-    return concat, out      
+    return out      
 def res_block_gen(model, kernal_size, filters, strides):
 
     gen = model
@@ -230,19 +219,9 @@ def squeeze_excite_channel_wise_block(input, ratio=16):
     x = multiply([init, se])
     return x
     
-def up_sampling_block(model, kernal_size, filters, strides):
-    
-    # In place of Conv2D and UpSampling2D we can also use Conv2DTranspose (Both are used for Deconvolution)
-    # Even we can have our own function for deconvolution (i.e one made in Utils.py)
-    #model = Conv2DTranspose(filters = filters, kernel_size = kernal_size, strides = strides, padding = "same")(model)
-    model = Conv2D(filters = filters, kernel_size = kernal_size, strides = strides, padding = "same")(model)
-    model = UpSampling2D(size = 2)(model)
-    model = LeakyReLU(alpha = 0.2)(model)
-    
-    return model
 
 
-def discriminator_block(model, filters, kernel_size, strides):
+def diagnosis_block(model, filters, kernel_size, strides):
     
     model = Conv2D(filters = filters, kernel_size = kernel_size, strides = strides, padding = "same")(model)
     model = BatchNormalization(momentum = 0.5)(model)
@@ -251,47 +230,42 @@ def discriminator_block(model, filters, kernel_size, strides):
     return model
 
 def reconst_block(input, filters, initializers, shape):
-    # create an image
+     ''' Create an initial image estimate''' 
     model= Dense( 128*128, activation = 'relu', kernel_initializer=initializers)(input)
     model = keras.layers.Reshape(shape)(model)
-    # convolve over image
+     ''' Shallow convolion over image ''' 
     model = Conv2D(filters = 32, kernel_size = 3, strides = 1, padding = "same")(model)
     model = Activation('relu')(model) 
-    # attention over image
+     ''' Deep attention block ''' 
     for index in range(4): #16
         model = res_block_gen(model, 3, 32, 1)
-    # for index in range(1): #16
-	#      model2= res_block_gen(model2, 5, 32, 1)
-#	    model = res_block_gen(model, 5, 32, 1)
-    # regularise  image
     model= Conv2D(filters = 32, kernel_size = 7, strides = 1, padding = "same",kernel_regularizer=tf.keras.regularizers.L2(0.001))(model)
     model = Activation('relu')(model)
     return model
 
 class Models(object):
 
-    def __init__(self, noise_shape):
+    def __init__(self, input_shape):
         
-        self.noise_shape = noise_shape
+        self.input_shape = input_shape
 
     def JRD(self):
 	    target_shape = [128, 128,1]
 	    normal=keras.initializers.he_normal(seed=None)
 
-	    input0 = keras.Input(shape = self.noise_shape, name="vec1")
+	    input0 = keras.Input(shape = self.input_shape, name="vec1")
 	    input0_n = GaussianNoise(0.1)(input0)
 
-	    input1 = keras.Input(shape = self.noise_shape, name="vec2")
+	    input1 = keras.Input(shape = self.input_shape, name="vec2")
 	    input1_n = GaussianNoise(0.1)(input1)#0.01
 
-	    input2 = keras.Input(shape = self.noise_shape, name="vec3")
+	    input2 = keras.Input(shape = self.input_shape, name="vec3")
 	    input2_n = GaussianNoise(0.1)(input2)
         
-	    input3 = keras.Input(shape = self.noise_shape, name="vec4")
+	    input3 = keras.Input(shape = self.input_shape, name="vec4")
 	    input3_n = GaussianNoise(0.1)(input3)
 
-	    # gen_input = tf.keras.layers.Concatenate()([input0, input1, input2, input3])
-	    feature, gen_input =Fusion(input0_n, input1_n, input2_n, input3_n)
+	    gen_input =Fusion(input0_n, input1_n, input2_n, input3_n)
 	    # gen_input = Activation("relu", name="21")(gen_input)
 
 #	    x = GaussianNoise(0.01)(gen_input)
