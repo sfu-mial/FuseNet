@@ -17,18 +17,6 @@ from keras.utils.vis_utils import plot_model
 
 
     
-def squeeze_excite_spacial_wise_block(input):
-    init = input
-    channel_axis = 1 if K.image_data_format() == "channels_first" else -1
-    # filters = init._keras_shape[channel_axis]
-    se = Conv2D(filters = 1, kernel_size = 1, strides = 1, padding = "same")(init)
-    se = Activation('sigmoid')(se) 
-
-    if K.image_data_format() == 'channels_first':
-        se = Permute((3, 1, 2))(se)
-
-    x = multiply([init, se])
-    return x
 
 
 def squeeze_excite_channel_wise_block(input, ratio=16):
@@ -48,6 +36,18 @@ def squeeze_excite_channel_wise_block(input, ratio=16):
     se = Reshape(se_shape)(se)
     se = Dense(filters // ratio, activation='relu', kernel_initializer='glorot_normal', use_bias=False)(se)
     se = Dense(filters, activation='sigmoid', kernel_initializer='glorot_normal', use_bias=False)(se)
+
+    if K.image_data_format() == 'channels_first':
+        se = Permute((3, 1, 2))(se)
+
+    x = multiply([init, se])
+    return x
+
+def squeeze_excite_spacial_wise_block(input):
+    init = input
+    channel_axis = 1 if K.image_data_format() == "channels_first" else -1
+    se = Conv2D(filters = 1, kernel_size = 1, strides = 1, padding = "same")(init)
+    se = Activation('sigmoid')(se) 
 
     if K.image_data_format() == 'channels_first':
         se = Permute((3, 1, 2))(se)
@@ -110,7 +110,6 @@ def diagnosis_block(model, filters, kernel_size, strides):
     return feature_clas, model
 
 
-    
 def Fusion_block(vec1, vec2, vec3,vec4):
     skip= 1,
     dim=32
