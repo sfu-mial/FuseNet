@@ -1,5 +1,6 @@
 # Deep Orthogonal Multi-Frequency Fusion for Tomogram-Free Diagnosis in Diffuse Optical Imaging
 This is the software repository for [our](https://www2.cs.sfu.ca/~hamarneh/ecopy/techrxiv_21574533.pdf) [paper](#cite) solving problem of breast cancer lesion detection and discrimination in a novel way.
+![Fig1_TMI2](https://github.com/haneneby/FuseNet/assets/22669736/3b9454b7-f533-41a9-a08c-6e5328f36472)
 ## Motivation
 Identifying breast cancer lesions with a portable diffuse optical tomography (DOT) device can improves early detection, while avoiding otherwise unnecessarily invasive, ionizing, and more expensive modalities such as CT, as well as enabling \review{ pre-screening efficiency. 
 To accurately capture the highly heterogeneous tissue of a cancer lesion embedded in healthy breast tissue with non-invasive DOT, multiple frequencies can be combined to optimize signal penetration and reduce sensitivity to noise.
@@ -19,8 +20,16 @@ We show that an orthogonal multi-frequency DOT fusion can improve reconstruction
 ### Installation
 #### Local
 ```bash
-git clone git@github.com:haneneby/FuseNet.git  
+git clone https://github.com/haneneby/FuseNet.git  
 cd FuseNet
 conda env create -f requirements.yml --name FuseNetest
 conda activate FuseNetest
 ```
+## Cite
+```bibtext
+@article{ben2022orthogonal,
+  title={Orthogonal Multi-frequency Fusion Based Image Reconstruction and Diagnosis in Diffuse Optical Tomography},
+  author={Ben Yedder, Hanene and Cardoen, Ben and Shokoufi, Majid and Golnaraghi, Farid and Hamarneh, Ghassan},
+  year={2022},
+  publisher={TechRxiv}
+}
