@@ -1,4 +1,4 @@
-# Module block for training Multi-freq model
+# Module blocks for building Multi-freq model
 
 from keras.layers import Dense
 from keras.layers.core import Activation
