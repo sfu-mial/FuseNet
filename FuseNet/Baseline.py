@@ -27,11 +27,11 @@ class Models(object):
 
         ''' Add noise '''
 	    input0 = keras.Input(shape = self.input_shape, name="vec1")
-	    input0 = GaussianNoise(0.1)(input0)
+	    input0_n = GaussianNoise(0.1)(input0)
 
         '''build_reconstruction_branchs'''
 		# final image #1
-	    model1 = reconst_block(input0, 32, initializers=normal, shape= target_shape)
+	    model1 = reconst_block(input0_n, 32, initializers=normal, shape= target_shape)
 	    out_r1 = Conv2D(filters = 1, kernel_size = 7, strides = 1,kernel_initializer='glorot_normal', padding = "same", name="reconstruction_output1")(model1)
 	   
         '''Task_branch'''
@@ -48,10 +48,10 @@ class Models(object):
 
         ''' Add noise '''
 	    input0 = keras.Input(shape = self.input_shape, name="vec1")
-	    input0 = GaussianNoise(0.1)(input0)
+	    input0_n = GaussianNoise(0.1)(input0)
 
         '''Task_branch'''
-	    feature_clas,  out_r_task = diagnosis_block(input0, 64, 3, 1)
+	    feature_clas,  out_r_task = diagnosis_block(input0_n, 64, 3, 1)
 
 	    generator_model = Model(inputs = [input0],  outputs = [out_r_task])
 	    generator_model.summary([])
