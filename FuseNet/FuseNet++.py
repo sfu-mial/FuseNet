@@ -422,7 +422,7 @@ def plot_generated_images(epoch,generator, val =True, examples=5, dim=(1, 6), fi
         image_batch_lr3 = x_test_lr_3[:,:]#0:25
         image_batch_lr4 = x_test_lr_4[:,:]#0:25
 
-        examples=len(x_test_hr)#
+        examples=50#len(x_test_hr)#
         dirfile='results/test_generated_image_epoch_'
     
     label, generated_image_1 ,generated_image_2, generated_image_3 ,generated_image_4, generated_image_f = generator.predict([image_batch_lr1,image_batch_lr2,image_batch_lr3,image_batch_lr4])

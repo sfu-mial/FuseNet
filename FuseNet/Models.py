@@ -61,12 +61,12 @@ class Models(object):
 	    out_r4= Conv2D(filters = 1, kernel_size = 7, strides = 1,kernel_initializer='glorot_normal', padding = "same", name="reconstruction_output4")(model4)
 
         #reconstruction_fusion
-	    model5 = reconst_block(gen_input, 32, initializers=normal, shape= target_shape)
+	    # model5 = reconst_block(gen_input, 32, initializers=normal, shape= target_shape)
 
-	    # model4= Dense( 128*128, activation = 'relu', kernel_initializer='glorot_normal')(gen_input)
-	    # model4 = keras.layers.Reshape(target_shape)(model4)
-	    # for index in range(4): #6
-	    #     model4 = res_block_gen(model4, 3, 32, 1)
+	    model5= Dense( 128*128, activation = 'relu', kernel_initializer='glorot_normal')(gen_input)
+	    model5 = keras.layers.Reshape(target_shape)(model5)
+	    for index in range(4): #6
+	        model5 = res_block_gen(model5, 3, 32, 1)
 
 	    out_r_fuse = Conv2D(filters = 1, kernel_size = 7, strides = 1,kernel_initializer='glorot_normal', padding = "same",name="reconstruction_output_fuse",kernel_regularizer=tf.keras.regularizers.L2(0.001))(model5)
 
