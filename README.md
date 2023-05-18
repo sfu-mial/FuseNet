@@ -21,12 +21,15 @@ We show that an orthogonal multi-frequency DOT fusion can improve reconstruction
 1. [Contribution](#contribution)
 2. [Installation](#install)
 3. [Usage](#usage)
-4. [Cite](#cite)
-6. [Questions?](#faq)
+4. [Questions?](#faq)
 
 ### Contribution
 <a name="contribution"></a>
-
+- We investigate the benefit of multi-frequency data on the quality of DOT reconstruction and breast lesion diagnosis using deep learning.
+- We propose a novel approach designed to recover the optical properties of breast tissue from multi-frequency data with a deep orthogonal fusion model followed by a diagnosis.
+- We investigate the merits of tackling the diagnosis prediction task from raw sensor data directly without image reconstruction in DOT (direct prediction).
+-  We extend a fusion network by training models using an orthogonalization loss function to maximize the independent contribution of each modulation frequency data and
+emphasize their collective strength. 
 ### Installation
 <a name="install"></a>
 
