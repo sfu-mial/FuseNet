@@ -190,6 +190,12 @@ def FuzzyJaccard_distance_loss(y_true, y_pred,  n_channels=1):
  	return union # (1- union )
 
 def OrthogonalProjectionLoss(features,labels, batch_size, gamma=0.5):
+    """
+    A Keras version of the orthogonal projection loss defined in
+    https://arxiv.org/pdf/2103.14021.pdf
+    https://github.com/kahnchana/opl
+    
+    """
         size = tf.shape(labels)[0]
 
         #  features are normalized
@@ -271,7 +277,14 @@ def categorical_focal_loss(y_true, y_pred,alpha, gamma=2.):
     return K.mean(K.sum(loss, axis=-1))
 
 
-def dst_transform(y_true, y_pred):   
+def dst_transform(y_true, y_pred):  
+    """
+    Compute the distance transform of y_true, y_pred 
+    Then calculate the error between the distance  (L1 or L2) 
+    Usage:
+    loss = dst_transform(weights)
+    """
+
     loss=0
     size= K.int_shape(y_true)[0]
     if (size is None):
