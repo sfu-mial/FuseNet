@@ -43,7 +43,7 @@ conda activate FuseNetest
 <a name="usage"></a>
 ```bash
 mkdir myoutput
-python FuseNet++.py --epochs 10 --outputroot myoutput
+python3 FuseNet++.py --epochs 10 --outputroot myoutput
 ```
 This will train the network and save output in `myoutput`.
 Examples of outputs are presented in [Images](FuseNet/Images) 
