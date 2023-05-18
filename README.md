@@ -36,7 +36,7 @@ emphasize their collective strength.
 ```bash
 git clone https://github.com/haneneby/FuseNet.git  
 cd FuseNet
-conda env create -f requirements.yml --name FuseNetest
+conda env create -f requirements.txt --name FuseNetest
 conda activate FuseNetest
 ```
 ### Usage
