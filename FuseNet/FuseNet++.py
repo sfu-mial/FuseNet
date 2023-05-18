@@ -172,38 +172,12 @@ class MyCallback(keras.callbacks.Callback):
         logger.info("epoch %s, alpha = %s, beta = %s" % (epoch, K.get_value(self.alpha), K.get_value(self.beta)))
 
 
-
-
 def loss(alpha, Beta,batch_size,feature, gamma):
     def custom_loss_func(y_true, y_pred):
         return custom_loss(y_true, y_pred, alpha, Beta,batch_size,feature,gamma)
     return custom_loss_func
 
 
-def weighted_categorical_crossentropy(y_true, y_pred,weights):
-    """
-    A weighted version of keras.objectives.categorical_crossentropy
-    
-    Variables:
-        weights: numpy array of shape (C,) where C is the number of classes
-    
-    Usage:
-        weights = np.array([0.5,2,10]) # Class one at 0.5, class 2 twice the normal weights, class 3 10x.
-        loss = weighted_categorical_crossentropy(weights)
-        model.compile(loss=loss,optimizer='adam')
-    """
-    
-    weights = K.variable(weights)
-        
-    # def loss(y_true, y_pred):
-    # scale predictions so that the class probas of each sample sum to 1
-    y_pred /= K.sum(y_pred, axis=-1, keepdims=True)
-    # clip to prevent NaN's and Inf's
-    y_pred = K.clip(y_pred, K.epsilon(), 1 - K.epsilon())
-    # calc
-    loss = y_true * K.log(y_pred) * weights
-    loss = -K.sum(loss, -1)
-    return loss
 
 def custom_loss(y_true, y_pred, alpha, Beta,batch_size,feature, gamma):
     # loss =losses.mean_squared_error(y_true, y_pred)# was 1*   mean_squared_error
@@ -217,19 +191,6 @@ def custom_loss(y_true, y_pred, alpha, Beta,batch_size,feature, gamma):
     loss +=0.3*OrthogonalProjectionLoss(feature ,y_true, batch_size, gamma=0.7) 
     return  loss/2
 
-def normalize_data(values):
-    from math import sqrt
-
-    # epsilon=0.001
-    # mvec = x.mean(1)
-    # stdvec = x.std(axis=1)
-    # return ((x - mvec)/stdvec)# s,mvec,stdvec
-    scaler = StandardScaler()
-    scaler = scaler.fit(values)
-    # print('Mean: %f, StandardDeviation: %f' % (scaler.mean_, sqrt(scaler.var_)))
-    # standardization the dataset and print the first 5 rows
-    normalized = scaler.transform(values)
-    return normalized
 
 def plot_generated_images(epoch,generator, val =True, examples=5, dim=(1, 6), figsize=(10, 5)):
     fg_color = 'black'
