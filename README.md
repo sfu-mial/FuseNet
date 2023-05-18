@@ -27,8 +27,8 @@ mkdir myoutput
 python FuseNet++.py --epochs 10 --outputroot myoutput
 ```
 This will train the network and save output in `myoutput`.
-Examples output are presented in [Images](FuseNet/Images) 
-![images/reconst](FuseNet/Images/test_generated_image-19.png?=100x100)
+Examples of outputs are presented in [Images](FuseNet/Images) 
+<!--![images/reconst](FuseNet/Images/test_generated_image-19.png?=100x100)-->
 
 ### Cite
 <a name="Cite"></a>
