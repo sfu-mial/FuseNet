@@ -4,8 +4,7 @@ This is the software repository for [our](https://www2.cs.sfu.ca/~hamarneh/ecopy
 Identifying breast cancer lesions with a portable diffuse optical tomography (DOT) device can improves early detection, while avoiding otherwise unnecessarily invasive, ionizing, and more expensive modalities such as CT, as well as enabling pre-screening efficiency. 
 To accurately capture the highly heterogeneous tissue of a cancer lesion embedded in healthy breast tissue with non-invasive DOT, multiple frequencies can be combined to optimize signal penetration and reduce sensitivity to noise.
 We show that an orthogonal multi-frequency DOT fusion can improve reconstruction and leads to more accurate end-to-end identification of malignant from benign lesions and healthy tissue, illustrating its regularization properties on the multi-frequency input space. Furthermore, we investigates the merits of tackling the diagnosis prediction task from raw sensor data directly without image reconstruction in DOT (direct prediction) and highlighs the potential of the raw-to-task model for improved accuracy, while reducing computational complexity.
-![Fig1_TMI2](https://github.com/haneneby/FuseNet/assets/22669736/3b9454b7-f533-41a9-a08c-6e5328f36472)
-
+![Fig1_TMI2](FuseNet/Images/Fig1_TMI2.png)
 ## Table of contents
 1. [Installation](#install)
 3. [Usage](#usage)
@@ -23,6 +22,13 @@ conda activate FuseNetest
 ```
 ### Usage
 <a name="usage"></a>
+```bash
+mkdir myoutput
+python FuseNet++.py --epochs 10 --outputroot myoutput
+```
+This will train the network and save output in `myoutput`.
+Examples output are presented in [Images](FuseNet/Images) 
+![images/reconst](FuseNet/Images/test_generated_image-19.png?=100x100)
 
 ### Cite
 <a name="Cite"></a>
@@ -37,5 +43,5 @@ conda activate FuseNetest
 
 ### Questions?
 <a name="faq"></a>
-Please create a new issue detailing concisely, yet complete what issue you encountered, in a reproducible way.
+Please create a [new issue](https://github.com/haneneby/FuseNet/issues/new/choose)  detailing concisely, yet complete what issue you encountered, in a reproducible way.
 
