@@ -26,7 +26,7 @@ from sklearn.metrics import mean_squared_error
 import numpy as np
 from numpy import array
 import skimage
-print(skimage.__version__)
+#print(skimage.__version__)
 from  skimage.metrics import structural_similarity as ssim
 import os
 from sklearn.preprocessing import MinMaxScaler
@@ -37,7 +37,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from keras.callbacks import LearningRateScheduler
 from keras.models import load_model
-os.environ["CUDA_VISIBLE_DEVICES"]="0"
+#os.environ["CUDA_VISIBLE_DEVICES"]="0"
 import timeit
 import math
 from sklearn.metrics import jaccard_score
