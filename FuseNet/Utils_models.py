@@ -27,9 +27,11 @@ from keras import backend as K
 from sklearn.metrics import mean_squared_error,median_absolute_error
 from keras.models import load_model
 import timeit
-import math
-from sklearn.metrics import jaccard_score
-
+from sklearn.metrics import jaccard_score, classification_report, confusion_matrix
+from  skimage.metrics import structural_similarity as ssim
+import skimage
+print(skimage.__version__)
+from keras import losses
 
 class VGG_LOSS(object):
 

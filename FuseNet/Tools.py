@@ -3,6 +3,8 @@ import os
 import tensorflow as tf
 import keras
 import keras.backend as K
+from keras.callbacks import LearningRateScheduler
+
 lgr = None
 
 def initlogger(configuration):

@@ -36,14 +36,17 @@ emphasize their collective strength.
 ```bash
 git clone https://github.com/haneneby/FuseNet.git  
 cd FuseNet
-conda env create -f requirements.txt --name FuseNetest
+conda env create --name FuseNetest python=3.8 # Higher fails with numpy 1.19
 conda activate FuseNetest
+pip install -r requirements.txt
 ```
 ### Usage
 <a name="usage"></a>
 ```bash
+export CUDA_VISIBLE_DEVICES=0 #or change to your GPU config
 mkdir myoutput
-python3 FuseNet++.py --epochs 10 --outputroot myoutput
+cd FuseNet
+python3 FuseNet++.py --epochs 10 --outputfolder ../myoutput
 ```
 This will train the network and save output in `myoutput`.
 Examples of outputs are presented in [Images](FuseNet/Images) 
