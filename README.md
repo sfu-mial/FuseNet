@@ -46,7 +46,7 @@ pip install -r requirements.txt
 export CUDA_VISIBLE_DEVICES=0 #or change to your GPU config
 mkdir myoutput
 cd FuseNet
-python3 FuseNet++.py --epochs 10 --outputroot ../myoutput
+python3 FuseNet++.py --epochs 10 --outputfolder ../myoutput
 ```
 This will train the network and save output in `myoutput`.
 Examples of outputs are presented in [Images](FuseNet/Images) 
