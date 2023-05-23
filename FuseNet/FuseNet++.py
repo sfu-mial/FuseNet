@@ -1,6 +1,7 @@
 import argparse
 from sklearn.preprocessing import StandardScaler
 import os
+from sklearn.preprocessing import label_binarize
 from LoadData import load_data, preprocess
 from Models import *
 from Tools import getlogger, initlogger
@@ -123,7 +124,8 @@ if __name__ == "__main__":
     print(arch)
     dataset_dir = conf['datasetdirectory']
     print (dataset_dir)
-    measure_1,measure_2,measure_3,measure_4, immatrix, label, testmeasure_1,testmeasure_2,testmeasure_3,testmeasure_4,immatrix_test ,label_test=load_data(dataset_dir)
+    measure_1,measure_2,measure_3,measure_4, x_train, label, testmeasure_1,testmeasure_2,testmeasure_3,testmeasure_4,immatrix_test ,label_test=load_data(dataset_dir)
+    print("data loaded")
 
 
 def train(epochs=1, batch_size=64):
@@ -199,92 +201,11 @@ def train(epochs=1, batch_size=64):
     checkpoint = ModelCheckpoint(filepath, verbose=1,  monitor='val_accuracy', save_weights_only=True, save_best_only=True, mode='max')
 # callbacks_list = [checkpoint]
 
-    history =model.fit([x_train_lr_1, x_train_lr_2, x_train_lr_3, x_train_lr_4], [ y_label,x_train_hr, x_train_hr, x_train_hr, x_train_hr, x_train_hr], epochs=epochs, batch_size=batch_size, shuffle=True,
+    history =model.fit([measure_1, measure_2, measure_3, measure_4], [label,x_train, x_train, x_train, x_train, x_train], epochs=epochs, batch_size=batch_size, shuffle=True,
     validation_split=0.1,
     # validation_data=(x_test_lr,x_test_hr),
      callbacks = [MyCallback(alpha, beta), plot_losses,checkpoint,LearningRateReducerCb(),reduce_lr])#,lr_decay_callback,change_lr
 
-def normalize_test(x,m):
-    epsilon=0.01
-    mvec = m.mean(1)
-    #print(mvec)
-    stdvec = m.std(axis=1)
-    #print(stdvec)
-    return ((x - mvec)/stdvec+epsilon)# s,mvec,stdvec
-#old  x_train, y_train, y_label, x_test, y_test, y_testlabel= a.load_data()
-
-# x_train_1= measure_1+ np.random.normal( measure_1.mean()/3, measure_1.mean()/2, 256)
-# x_train_2= measure_2+ np.random.normal( measure_2.mean()/3, measure_2.mean()/2, 256)
-# x_train_3= measure_3+ np.random.normal( measure_3.mean()/3, measure_3.mean()/2, 256)
-# x_train_4= measure_4+ np.random.normal( measure_4.mean()/3, measure_4.mean()/2, 256)
-
-# y_train= immatrix
-# x_test_2= testmeasure_2+ np.random.normal( testmeasure_2.mean()/3, testmeasure_2.mean()/2, 256)
-# x_test_1= testmeasure_1+ np.random.normal( testmeasure_1.mean()/3, testmeasure_1.mean()/2, 256)
-# x_test_3= testmeasure_3+ np.random.normal( testmeasure_3.mean()/3, testmeasure_3.mean()/2, 256)
-# x_test_4= testmeasure_4+ np.random.normal( testmeasure_4.mean()/3, testmeasure_4.mean()/2, 256)
-# x_train= measure_750
-y_train_label= label
-y_trainima= immatrix
-
-
-x_train_1= normalize_data (x_train_1) #here
-x_test_1 = normalize_data(x_test_1) #here
-
-x_train_2= normalize_data (x_train_2) #here
-x_test_2= normalize_data(x_test_2) #here
-
-x_train_3= normalize_data (x_train_3) #here
-x_test_3 = normalize_data(x_test_3) #here
-
-x_train_4= normalize_data (x_train_4) #here
-x_test_4= normalize_data(x_test_4) #here
-# x_test= testmeasure_750
-y_testlabel=label_test
-y_testima= immatrix_test
-
-x_train_lr_2 = x_train_2
-x_train_lr_1 = x_train_1
-x_train_lr_3 = x_train_3
-x_train_lr_4 = x_train_4
-
-x_test_lr_2 = x_test_2
-x_test_lr_1 = x_test_1
-x_test_lr_4 = x_test_4
-x_test_lr_3 = x_test_3
-
-y_train = np.reshape(y_trainima, (len(y_trainima), 128, 128,1))  #
-
-y_test = np.reshape(y_testima, (len(y_testima), 128, 128,1))  #
-x_train_hr=y_train
-x_test_hr=  y_test
-
-print("data loaded")
-
-
-#x_real = normalize_data(x_real)
-
-# y_train = np.reshape(y_train, (len(y_train), 128, 128,1))  #
-
-# y_testima = np.reshape(y_test, (len(y_test), 128, 128,1))  #
-
-
-from sklearn.preprocessing import label_binarize
-# Binarize the output
-# y = label_binarize(Y_testlabel, classes=[0, 1, 2])
-#test images
-# x_train_lr = x_train
-y_label= label_binarize(y_train_label, classes=[0, 1, 2])#np_utils.to_categorical(y_train, 3)
-
-
-# x_test_lr = x_test
-Y_testlabel=label_binarize(y_testlabel, classes=[0, 1, 2])# #np_utils.to_categorical(y_test, 3)
-Y_testlabel=np_utils.to_categorical(y_testlabel, 3)
-
-
-
-
-print("data processed")
 
 train(25,16)
 

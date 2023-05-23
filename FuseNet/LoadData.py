@@ -22,6 +22,7 @@ FORMAT = "[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
 logging.basicConfig(format=FORMAT)
 lgr = logging.getLogger('global')
 lgr.setLevel(logging.INFO)
+from sklearn.preprocessing import label_binarize
 
 
 def load_data(direc):
@@ -144,6 +145,8 @@ def load_data(direc):
      testmeasure_850,immatrix_test ,label_test) 
 
      return preprocess(X_train_690,X_train_750,X_train_800,X_train_850,y_train,Y_label,X_test_690,X_test_750,X_test_800,X_test_850,y_test,Y_testlabel)
+
+
 def preprocess(X_train_690,X_train_750,X_train_800,X_train_850,y_train,Y_label,X_test_690,X_test_750,X_test_800,X_test_850,y_test,Y_testlabel):
      print ('here')
      x_train_1= X_train_690#+ np.random.normal( measure_1.mean()/3, measure_1.mean()/2, 256)
@@ -178,4 +181,10 @@ def preprocess(X_train_690,X_train_750,X_train_800,X_train_850,y_train,Y_label,X
      y_train = np.reshape(y_trainima, (len(y_trainima), 128, 128,1))  #
      y_test = np.reshape(y_testima, (len(y_testima), 128, 128,1))  #
 
-     return x_train_1, x_train_2, x_train_3, x_train_4, y_train, Y_label, x_test_1, x_test_2, x_test_3, x_test_4, y_test, Y_testlabel
+     y_label= label_binarize(Y_label, classes=[0, 1, 2])#np_utils.to_categorical(y_train, 3)
+
+     y_testlabel=label_binarize(Y_testlabel, classes=[0, 1, 2])# #np_utils.to_categorical(y_test, 3)
+
+
+
+     return x_train_1, x_train_2, x_train_3, x_train_4, y_train, y_label, x_test_1, x_test_2, x_test_3, x_test_4, y_test, y_testlabel
