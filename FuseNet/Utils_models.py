@@ -3,6 +3,7 @@
 #usage           :imported in other files
 #python_version  :3.5.4
 import tensorflow as tf
+from sklearn.preprocessing import StandardScaler
 from keras.applications.vgg19 import VGG19
 import keras.backend as K
 from keras.models import Model
@@ -49,20 +50,6 @@ class VGG_LOSS(object):
     
         return K.mean(K.square(model(y_true) - model(y_pred)))
 
-class CustomSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
-  def __init__(self, d_model, warmup_steps=30):
-    super(CustomSchedule, self).__init__()
-
-    self.d_model = d_model
-    self.d_model = tf.cast(self.d_model, tf.float32)
-
-    self.warmup_steps = warmup_steps
-
-  def __call__(self, step):
-    arg1 = tf.math.rsqrt(step)
-    arg2 = step * (self.warmup_steps ** -1.5)
-
-    return tf.math.rsqrt(self.d_model) * tf.math.minimum(arg1, arg2)  
 
 def get_optimizer():
  
@@ -196,37 +183,37 @@ def OrthogonalProjectionLoss(features,labels, batch_size, gamma=0.5):
     https://github.com/kahnchana/opl
     
     """
-        size = tf.shape(labels)[0]
+    size = tf.shape(labels)[0]
 
-        #  features are normalized
-        features = K.tf.math.l2_normalize(features, 1)#F.normalize(features, p=2, dim=1)
-        print("features {.shape}".format(features))
+    #  features are normalized
+    features = K.tf.math.l2_normalize(features, 1)#F.normalize(features, p=2, dim=1)
+    print("features {.shape}".format(features))
 
-        labels = K.tf.expand_dims(labels,2) #labels[:, None]  # extend dim
-        print("labels {.shape}".format(labels))
+    labels = K.tf.expand_dims(labels,2) #labels[:, None]  # extend dim
+    print("labels {.shape}".format(labels))
 
-        mask= (K.tf.equal(labels,K.transpose (labels)))  #torch.eq(labels, labels.t()).bool().to(device)
-        print("mask {.shape}".format(mask))
-        eye= tf.cast(K.tf.eye(size,3), tf.bool)
-        eye_t= ~eye
-        # eye =K.tf.eye(batch_size])# torch.eye(mask.shape[0], mask.shape[1]).bool().to(device)
-        print("eye {.shape}".format(eye))
-        mask_pos = tf.cast(tf.linalg.set_diag( mask, eye_t), tf.float32)#(mask,eye, tf.zeros_like(eye))#, eye)#mask.masked_fill(eye, 0).float()
-        print("mask_pos {.shape}".format(mask_pos))
-        mask_neg = tf.cast((~mask), tf.float32)
-        print("mask_neg {.shape}".format(mask_neg))
-        dot_prod =K.dot(features, K.transpose (features))
-        print("dot_prod {.shape}".format(dot_prod))
-        # dot_prod = K.tf.expand_dims(dot_prod,2) 
-        pos_pairs_mean = K.sum(tf.linalg.matmul (mask_pos , dot_prod)) / K.sum (mask_pos + 1e-6)
-        print("pos_pairs_mean {.shape}".format(pos_pairs_mean))
+    mask= (K.tf.equal(labels,K.transpose (labels)))  #torch.eq(labels, labels.t()).bool().to(device)
+    print("mask {.shape}".format(mask))
+    eye= tf.cast(K.tf.eye(size,3), tf.bool)
+    eye_t= ~eye
+    # eye =K.tf.eye(batch_size])# torch.eye(mask.shape[0], mask.shape[1]).bool().to(device)
+    print("eye {.shape}".format(eye))
+    mask_pos = tf.cast(tf.linalg.set_diag( mask, eye_t), tf.float32)#(mask,eye, tf.zeros_like(eye))#, eye)#mask.masked_fill(eye, 0).float()
+    print("mask_pos {.shape}".format(mask_pos))
+    mask_neg = tf.cast((~mask), tf.float32)
+    print("mask_neg {.shape}".format(mask_neg))
+    dot_prod =K.dot(features, K.transpose (features))
+    print("dot_prod {.shape}".format(dot_prod))
+    # dot_prod = K.tf.expand_dims(dot_prod,2) 
+    pos_pairs_mean = K.sum(tf.linalg.matmul (mask_pos , dot_prod)) / K.sum (mask_pos + 1e-6)
+    print("pos_pairs_mean {.shape}".format(pos_pairs_mean))
 
-        neg_pairs_mean = K.sum(tf.matmul(mask_neg , dot_prod))/ K.sum(mask_neg + 1e-6)
-        print("neg_pairs_mean {.shape}".format(neg_pairs_mean))
-        loss = (1.0 - pos_pairs_mean) + gamma * neg_pairs_mean
-        print("loss {.shape}".format(loss))
+    neg_pairs_mean = K.sum(tf.matmul(mask_neg , dot_prod))/ K.sum(mask_neg + 1e-6)
+    print("neg_pairs_mean {.shape}".format(neg_pairs_mean))
+    loss = (1.0 - pos_pairs_mean) + gamma * neg_pairs_mean
+    print("loss {.shape}".format(loss))
 
-        return loss
+    return loss
 
 
 def categorical_focal_loss(y_true, y_pred,alpha, gamma=2.):
@@ -381,3 +368,323 @@ def weighted_categorical_crossentropy(y_true, y_pred,weights):
     loss = y_true * K.log(y_pred) * weights
     loss = -K.sum(loss, -1)
     return loss
+
+
+def loss(alpha, Beta,batch_size,feature, gamma):
+    def custom_loss_func(y_true, y_pred):
+        return custom_loss(y_true, y_pred, alpha, Beta,batch_size,feature,gamma)
+    return custom_loss_func
+
+
+def custom_loss(y_true, y_pred, alpha, Beta,batch_size,feature, gamma):
+    # loss =losses.mean_squared_error(y_true, y_pred)# was 1*   mean_squared_error
+
+    # loss+= Beta*FuzzyJaccard_distance_loss(y_true, y_pred)#  Beta* was 0.4, 0.3
+    # loss +=alpha* dst_transform(y_true, y_pred)
+    weights= np.array([0.3,.5,.5])
+    ce =losses.categorical_crossentropy(y_true, y_pred)
+    loss= weighted_categorical_crossentropy(y_true, y_pred,weights)
+    # loss=categorical_focal_loss(y_true, y_pred, alpha=[[.25, .25, .25]], gamma=2.)
+    loss +=0.3*OrthogonalProjectionLoss(feature ,y_true, batch_size, gamma=0.7) 
+    return  loss/2
+
+def loss_r(alpha, Beta,batch_size):
+    def custom_loss_func_r(y_true, y_pred):
+        return custom_loss_r(y_true, y_pred, alpha, Beta,batch_size)
+    return custom_loss_func_r
+
+def custom_loss_r(y_true, y_pred, alpha, Beta,batch_size):  # orthogonal_loss
+    loss =losses.mean_squared_error(y_true, y_pred)# was 1*   mean_squared_error
+#    loss +=losses.mean_absolute_error(y_true, y_pred)# was 1*   mean_squared_error
+
+    loss+= Beta*FuzzyJaccard_distance_loss(y_true, y_pred)#  Beta* was 0.4, 0.3
+    loss +=alpha* dst_transform(y_true, y_pred)
+#    loss +=second_derivative(y_true, y_pred)#dst_transform(y_true, y_pred)
+    # loss+= 0.3*vgg_loss(y_true, y_pred)
+    return  loss
+
+def plot_generated_images(epoch,generator, val =True, examples=5, dim=(1, 6), figsize=(10, 5)):
+    fg_color = 'black'
+    bg_color =  'white'
+    DistanceROI = []
+    mselist=[]
+    psnrlist=[]
+    ssimlist=[]
+    Dicelist= []
+    FJaccard=[]
+    vmin=0
+    vmax=25
+    PD_label=[]
+    GT_label=[]
+    global Tmp_ssimlist
+    if (val ==True):
+        # rand_nums = np.random.randint(0, x_test_hr.shape[0], size=examples)
+        image_batch_hr = x_test_hr[:,:]
+        image_batch_lr1 = x_test_lr_1[:,:]#0:25
+        image_batch_lr2 = x_test_lr_2[:,:]#0:25
+        image_batch_lr3 = x_test_lr_3[:,:]#0:25
+        image_batch_lr4 = x_test_lr_4[:,:]#0:25
+
+        examples=50#len(x_test_hr)#
+        dirfile='results/test_generated_image_epoch_'
+    
+    label, generated_image_1 ,generated_image_2, generated_image_3 ,generated_image_4, generated_image_f = generator.predict([image_batch_lr1,image_batch_lr2,image_batch_lr3,image_batch_lr4])
+#    generated_image = denormalize(gen_img)
+#    image_batch_lr = denormalize(image_batch_lr)
+
+    #generated_image = deprocess_HR(generator.predict(image_batch_lr))
+    for index in range(examples):
+            if (val==False):
+             image_batch_hr[index]=(image_batch_hr[index]).reshape(128, 128)
+            fig=plt.figure(figsize=figsize)
+            #combined_data = np.array([ image_batch_hr[index], generated_image[index].reshape(128, 128) ])
+            #_min, _max = np.amin(combined_data), np.amax(combined_data)
+            # _vmin1 = (image_batch_hr[index]).min()
+            # _vmax1 = (image_batch_hr[index]).max()
+            #
+            # _vmin2 = (generated_image[index]).min()
+            # _vmax2 = (generated_image[index]).max()
+            # vmin= min(vmin , min(_vmin1, _vmin2))
+            # vmax = max(vmax, min(_vmax1, _vmax2))
+
+#        	ax1=plt.subplot(dim[0], dim[1], 1)
+            ax1=plt.subplot(dim[0], dim[1], 1)
+            ax1.set_title('GT', color=fg_color)
+            imgn = np.flipud(image_batch_hr[index]) #/ np.linalg.norm(image_batch_hr[index])
+            im1 = ax1.imshow(imgn.reshape(128, 128))  # , interpolation='nearest')
+            # im1=ax1.imshow(image_batch_hr[index].reshape(128, 128))#,vmin = _min, vmax = _max)#, interpolation='nearest')
+            divider = make_axes_locatable(ax1)
+            cax = divider.append_axes('right', size='5%', pad=0.05)
+            ax1.axis('off')
+            fig.colorbar(im1, cax=cax, orientation='vertical')
+
+
+
+            ax2=plt.subplot(dim[0], dim[1], 2)
+            imgnr = np.flipud(generated_image_1[index]) #/ np.linalg.norm(image_batch_hr[index])
+            ax2.set_title('Recons_f1', color=fg_color)
+            im2=plt.imshow(imgnr.reshape(128, 128))#,vmin = _min, vmax = _max)#, interpolation='nearest')
+            divider = make_axes_locatable(ax2)
+            cax = divider.append_axes('right', size='5%', pad=0.05)
+            ax2.axis('off')
+            fig.colorbar(im2, cax=cax, orientation='vertical')
+
+            ax3=plt.subplot(dim[0], dim[1], 3)
+            imgnr = np.flipud(generated_image_2[index]) #/ np.linalg.norm(image_batch_hr[index])
+            ax3.set_title('Recons_f2', color=fg_color)
+            im2=plt.imshow(imgnr.reshape(128, 128))#,vmin = _min, vmax = _max)#, interpolation='nearest')
+            divider = make_axes_locatable(ax3)
+            cax = divider.append_axes('right', size='5%', pad=0.05)
+            ax3.axis('off')
+            fig.colorbar(im2, cax=cax, orientation='vertical')
+
+            ax4=plt.subplot(dim[0], dim[1], 4)
+            imgnr = np.flipud(generated_image_3[index]) #/ np.linalg.norm(image_batch_hr[index])
+            ax4.set_title('Recons_f3', color=fg_color)
+            im2=plt.imshow(imgnr.reshape(128, 128))#,vmin = _min, vmax = _max)#, interpolation='nearest')
+            divider = make_axes_locatable(ax4)
+            cax = divider.append_axes('right', size='5%', pad=0.05)
+            ax4.axis('off')
+            fig.colorbar(im2, cax=cax, orientation='vertical')
+
+            ax5=plt.subplot(dim[0], dim[1], 5)
+            imgnr = np.flipud(generated_image_4[index]) #/ np.linalg.norm(image_batch_hr[index])
+            ax5.set_title('Recons_f4', color=fg_color)
+            im2=plt.imshow(imgnr.reshape(128, 128))#,vmin = _min, vmax = _max)#, interpolation='nearest')
+            divider = make_axes_locatable(ax5)
+            cax = divider.append_axes('right', size='5%', pad=0.05)
+            ax5.axis('off')
+            fig.colorbar(im2, cax=cax, orientation='vertical')
+
+            ax6=plt.subplot(dim[0], dim[1], 6)
+            imgnr = np.flipud(generated_image_f[index]) #/ np.linalg.norm(image_batch_hr[index])
+            ax6.set_title('Recons_all', color=fg_color)
+            im2=plt.imshow(imgnr.reshape(128, 128))#,vmin = _min, vmax = _max)#, interpolation='nearest')
+            divider = make_axes_locatable(ax6)
+            cax = divider.append_axes('right', size='5%', pad=0.05)
+            ax6.axis('off')
+            fig.colorbar(im2, cax=cax, orientation='vertical')
+
+
+            plt.tight_layout(pad=0.01)
+            plt.savefig(dirfile+ '-' +str(index)+'.png' )
+            #a=image_batch_hr[index]
+
+#            a=cv2.normalize( image_batch_hr[index],None, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
+            #b=generated_image[index]#
+#            b=cv2.normalize( generated_image[index],None, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
+            v=calculateDistance (generated_image_f[index],image_batch_hr[index])#
+            DistanceROI.append(v)
+#            mse=mean_squared_error(a,b)
+#            mselist.append(mse)
+            p=psnr(generated_image_f[index],image_batch_hr[index])#(y_te[i],decoded_imgs[i].reshape(128, 128)) #(a.reshape(128, 128),b)#
+            psnrlist.append(p)
+            ss_im = ssim(image_batch_hr[index].reshape(128, 128), generated_image_f[index].reshape(128, 128))
+            ssimlist.append(ss_im)
+#        	if min(image_batch_hr[index])==max(generated_image[index]):
+#        		threshold_GT = filter.threshold_otsu(a)
+#        		threshold_Rec = filter.threshold_otsu(b)
+#    #    plt.imshow(a > threshold_GT )
+#        		gt=a > threshold_GT
+#
+#        		seg=b > 0.6
+            #dice = np.sum(seg[gt==1])*2.0 / (np.sum(seg) + np.sum(gt))
+#        		dices= Dice(gt,seg)
+#        		dices=jaccard_similarity_score(gt,seg)
+#        		Dicelist.append(dices)
+            fjacc= FuzzyJaccard(image_batch_hr[index],generated_image_f[index])
+            FJaccard.append(fjacc)
+            plt.close("all")
+            PD_label.append(label[index])
+            GT_label.append(y_testlabel[index])
+    FJ_mean= np.mean(FJaccard)
+    FJ_std= np.std(FJaccard)
+    DistanceROI_mean= np.mean(DistanceROI)
+    DistanceROI_std= np.std(DistanceROI)
+#    mse_mean=np.mean(mselist)
+#    mse_std=np.std(mselist)
+    psnr_mean=np.mean(psnrlist)
+    psnr_std=np.std(psnrlist)
+    ssim_mean=np.mean(ssimlist)
+    ssim_std=np.std(ssimlist)
+#    dice_mean=np.mean(Dicelist)
+#    dice_std=np.std(Dicelist)
+    loss_file = open('results/losses.txt' , 'a')
+    if (val == True):
+        loss_file.write('synthe  epoch%d :  DistanceROI = %s + ~  %s ; psnr_mean = %s + ~  %s ; ssim_mean = %s + ~  %s ; FuzzyJaccard_mean = %s + ~ %s \n' %(epoch, DistanceROI_mean, DistanceROI_std,psnr_mean,psnr_std,ssim_mean, ssim_std, FJ_mean, FJ_std ) )
+    if Tmp_ssimlist<ssim_mean:
+        generator.save('./results/Checkpoint.h5')
+        print('ssim improved from %s to %s, saving model to weight\n' %(Tmp_ssimlist, ssim_mean))
+        Tmp_ssimlist = ssim_mean
+    loss_file = open('results/losses_acc.txt' , 'a')
+    if (val == True):
+        loss_file.write('synthe  epoch%d :  GT_label = %s ; label = %s  \n' %(epoch, GT_label, label ) )
+
+
+#    loss_file.write('epoch%d : DistanceROI_mean = %s + ~ %s ;  psnr_mean = %s + ~  %s  ; FuzzyJaccard_mean = %s + ~ %s \n' %(epoch, DistanceROI_mean,DistanceROI_std, psnr_mean,psnr_std, FJ_mean, FJ_std ) )
+    loss_file.close()
+
+
+
+#    loss_file.write('epoch%d : DistanceROI_mean = %s + ~ %s ;  psnr_mean = %s + ~  %s  ; FuzzyJaccard_mean = %s + ~ %s \n' %(epoch, DistanceROI_mean,DistanceROI_std, psnr_mean,psnr_std, FJ_mean, FJ_std ) )
+    loss_file.close()
+
+def plot_confusion_matrix(cm, title='Confusion matrix', cmap=plt.cm.Blues):
+    ##https://scikit-learn.org/0.16/auto_examples/model_selection/plot_confusion_matrix.html#example-model-selection-plot-confusion-matrix-py
+    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.title(title)
+    plt.colorbar()
+    tick_marks = np.arange(len(y_test))
+    tick_marks = np.arange(3)
+    classes=['healthy', 'Benign', 'malign']
+    plt.xticks(tick_marks, classes, rotation=45)
+    plt.yticks(tick_marks, classes)
+    plt.tight_layout()
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')    
+
+    thresh = cm.max()/2
+
+    for i,j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        plt.text(j,i, cm[i,j], horizontalalignment='center', color='white' if cm[i,j] > thresh else 'black', fontsize=25, fontweight='bold')
+        plt.tight_layout()
+        plt.ylabel('Actual Class')
+        plt.xlabel('Predicted Class')
+
+def plot_confusionmatrix(epoch,RToT_model):
+
+    #  Y_pred = RToT_model.predict([x_test_lr_1, x_test_lr_2, x_test_lr_3,x_test_lr_4])
+    
+    # y_pred = np.argmax(Y_pred, axis=1)
+    # cm=confusion_matrix(y_test, y_pred)
+    Y_pred, Im_pred_1,Im_pred_2, Im_pred_3,Im_pred_4, Im_pred_f = RToT_model.predict([x_test_lr_1, x_test_lr_2, x_test_lr_3,x_test_lr_4])
+    y_pred = np.argmax(Y_pred, axis=1)
+    # print(Y_pred)
+    # print(y_pred)
+    # lb = preprocessing.LabelBinarizer()
+    # print(lb.transform(y_pred))
+    # print(y_testlabel)
+    cm=confusion_matrix(y_testlabel, y_pred)
+    print('Classification Report')
+    target_names = ['healthy', 'Benign', 'malign']
+    print(y_testlabel.shape, y_pred.shape)
+    print(classification_report(y_testlabel, y_pred, target_names=target_names))
+    Classification_Report_file = open('results/losses.txt' , 'a')
+    report = classification_report(y_testlabel, y_pred, output_dict=True)
+    df = pd.DataFrame(report).transpose()
+    df.to_csv('results/Classification_Report_file.txt',  header=True, index=False, sep='\t', mode='a')
+    # Classification_Report_file.write('synthe  epoch%d :  classification_report%s \n' %(epoch, df))
+    Classification_Report_file.close()
+
+
+    plt.figure()
+    plot_confusion_matrix(cm)
+    dirfile='results/confusion_matrix'
+    plt.savefig(dirfile+ '-'+'.png' )
+    plt.close("all")
+
+
+    # Normalize the confusion matrix by row (i.e by the number of samples
+    # in each class)
+    cm_normalized = np.around(cm.astype('float') / cm.sum(axis=1)[:, np.newaxis],decimals=2)
+    print('Normalized confusion matrix')
+    print(cm_normalized)
+    plt.figure()
+    plot_confusion_matrix(cm_normalized, title='Normalized confusion matrix')
+    dirfile='results/Normalized_confusion_matrix'
+    plt.savefig(dirfile+ '-'+'.png' )
+    plt.close("all")
+
+def plot_roc_curve(model):
+    from sklearn.metrics import roc_curve
+    from sklearn.metrics import roc_auc_score
+    from sklearn.preprocessing import label_binarize
+    # Binarize the output
+    y = label_binarize(y_testlabel, classes=[0, 1, 2])
+    # generate a no skill prediction (majority class)
+    ns_probs = [0 for _ in range(len(y_testlabel))]
+    # keep probabilities for the positive outcome only
+    # Y_pred = model.predict([x_test_lr_1, x_test_lr_2, x_test_lr_3,x_test_lr_4])
+    Y_pred, Im_pred_1,Im_pred_2, Im_pred_3,Im_pred_4, Im_pred_f = model.predict([x_test_lr_1, x_test_lr_2, x_test_lr_3,x_test_lr_4])
+    lr_probs_ben = Y_pred[:, 1]
+    lr_probs_mal = Y_pred[:, 2]
+    lr_probs_heal = Y_pred[:, 0]
+
+    # calculate scores
+    lr_auc_ben = roc_auc_score(y[:, 1], lr_probs_ben)
+    ns_auc = roc_auc_score(y[:, 1], ns_probs)
+    lr_auc_mal = roc_auc_score(y[:, 2], lr_probs_mal)
+    lr_auc_H = roc_auc_score(y[:, 0], lr_probs_heal)
+
+    # summarize scores
+    print('No Skill: ROC AUC=%.3f' % (ns_auc))
+    print('Benign: ROC AUC=%.3f' % (lr_auc_ben))
+    print('Malignant: ROC AUC=%.3f' % (lr_auc_mal))
+    print('Healthy: ROC AUC=%.3f' % (lr_auc_H))
+
+    # calculate roc curves
+    ns_fpr, ns_tpr, _ = roc_curve(y[:, 1], ns_probs)
+    lr_fprb, lr_tprb, _ = roc_curve(y[:, 1], lr_probs_ben)
+    lr_fprm, lr_tprm, _ = roc_curve(y[:, 2], lr_probs_mal)
+    lr_fprh, lr_tprh, _ = roc_curve(y[:, 0], lr_probs_heal)
+
+
+    # plot the roc curve for the model
+    plt.plot(ns_fpr, ns_tpr, linestyle='--', label='')
+    plt.plot(lr_fprb, lr_tprb, marker='.', label='Benign(ROC AUC=%.3f)' % (lr_auc_ben))
+    plt.plot(lr_fprm, lr_tprm, marker='+', label='Malignant(ROC AUC=%.3f)' % (lr_auc_mal))
+    plt.plot(lr_fprh, lr_tprh, marker='x', label='Healthy (ROC AUC=%.3f)' % (lr_auc_H))
+
+    # axis labels
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    # show the legend
+    plt.legend()
+    # show the plot
+    # plt.show()
+    dirfile='results/Roc_curve'
+    plt.savefig(dirfile+ '-'+'.png' )
+    plt.close("all")
+
+
+
