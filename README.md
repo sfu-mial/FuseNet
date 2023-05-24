@@ -36,9 +36,8 @@ emphasize their collective strength.
 ```bash
 git clone https://github.com/haneneby/FuseNet.git  
 cd FuseNet
-conda env create --name FuseNetest python=3.8 # Higher fails with numpy 1.19
-conda activate FuseNetest
-pip install -r requirements.txt
+conda env create -f requirement.yml --name FuseNet
+conda activate FuseNet
 ```
 ### Usage
 <a name="usage"></a>
