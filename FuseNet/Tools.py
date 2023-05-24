@@ -4,7 +4,11 @@ import tensorflow as tf
 import keras
 import keras.backend as K
 from keras.callbacks import LearningRateScheduler
+import matplotlib
+import matplotlib.pyplot as plt
+from Utils_models import *
 
+matplotlib.use('Agg')
 lgr = None
 
 def initlogger(configuration):
@@ -130,12 +134,10 @@ class LearningRateReducerCb(tf.keras.callbacks.Callback):
     new_lr = old_lr * 0.99
     print("\nEpoch: {}. Reducing Learning Rate from {} to {}".format(epoch, old_lr, new_lr))
     self.model.optimizer.lr.assign(new_lr)
-    if epoch >= 1: #and epoch % 2 == 0:
-        plot_generated_images(epoch, self.model, True,Tmp_ssimlist)
-        plot_confusionmatrix(epoch, self.model)
-        plot_roc_curve(self.model)
-        # lr schedule callback
-        # lr_decay_callback = tf.keras.callbacks.LearningRateScheduler(lr_decay)
+    # if epoch >= 1: 
+    #     plot_generated_images(epoch, self.model, True,Tmp_ssimlist)
+    #     plot_confusionmatrix(epoch, self.model)
+    #     plot_roc_curve(self.model)
 
     PlotLosses()
     if epoch == 5 or (epoch >= 10 and epoch % 10 == 0):

@@ -13,9 +13,13 @@ import os
 import numpy as np
 import pandas as pd
 import glob
+import math
 from numpy import genfromtxt
 from keras import optimizers
+import matplotlib as mpl
 import matplotlib.pyplot as plt
+mpl.use('Agg')
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 from sklearn.decomposition import PCA
 from sklearn import preprocessing
 import time
@@ -32,7 +36,8 @@ from  skimage.metrics import structural_similarity as ssim
 import skimage
 print(skimage.__version__)
 from keras import losses
-
+global Tmp_ssimlist
+Tmp_ssimlist = 0
 class VGG_LOSS(object):
 
     def __init__(self, image_shape):
@@ -371,6 +376,23 @@ def weighted_categorical_crossentropy(y_true, y_pred,weights):
     loss = -K.sum(loss, -1)
     return loss
 
+def lr_decay(epoch):
+        return 0.1 * math.pow(0.1, epoch)
+
+def scheduler(epoch):
+        if epoch >= 1: #and epoch % 2 == 0:
+            plot_generated_images(epoch, model, True,Tmp_ssimlist)
+            plot_confusionmatrix(epoch, model)
+            plot_roc_curve(model)
+            # lr schedule callback
+            # lr_decay_callback = tf.keras.callbacks.LearningRateScheduler(lr_decay)
+
+            PlotLosses()
+            if epoch == 5 or (epoch >= 10 and epoch % 10 == 0):
+                generator.save('./results/deep_spa_mse_only.h5')
+
+
+        return K.get_value(model.optimizer.lr)
 
 def loss(alpha, Beta,batch_size,feature, gamma):
     def custom_loss_func(y_true, y_pred):
@@ -405,7 +427,7 @@ def custom_loss_r(y_true, y_pred, alpha, Beta,batch_size):  # orthogonal_loss
     # loss+= 0.3*vgg_loss(y_true, y_pred)
     return  loss
 
-def plot_generated_images(epoch,generator, val =True, examples=5, dim=(1, 6), figsize=(10, 5)):
+def plot_generated_images(epoch, generator,dir,measure_1, measure_2, measure_3, measure_4, x_train, GT_label,val =True, examples=20, dim=(1, 6), figsize=(10, 5)):
     fg_color = 'black'
     bg_color =  'white'
     DistanceROI = []
@@ -416,159 +438,114 @@ def plot_generated_images(epoch,generator, val =True, examples=5, dim=(1, 6), fi
     FJaccard=[]
     vmin=0
     vmax=25
-    PD_label=[]
-    GT_label=[]
+    # PD_label=[]
+    # GT_label=[]
     global Tmp_ssimlist
     if (val ==True):
-        # rand_nums = np.random.randint(0, x_test_hr.shape[0], size=examples)
-        image_batch_hr = x_test_hr[:,:]
-        image_batch_lr1 = x_test_lr_1[:,:]#0:25
-        image_batch_lr2 = x_test_lr_2[:,:]#0:25
-        image_batch_lr3 = x_test_lr_3[:,:]#0:25
-        image_batch_lr4 = x_test_lr_4[:,:]#0:25
-
-        examples=50#len(x_test_hr)#
-        dirfile='results/test_generated_image_epoch_'
+        image_batch_hr = x_train[:,:]
+        image_batch_lr1 = measure_1[:,:]
+        image_batch_lr2 = measure_2[:,:]
+        image_batch_lr3 = measure_3[:,:]
+        image_batch_lr4 = measure_4[:,:]
+        dirfile= dir+ '/test_generated_image_'
     
     label, generated_image_1 ,generated_image_2, generated_image_3 ,generated_image_4, generated_image_f = generator.predict([image_batch_lr1,image_batch_lr2,image_batch_lr3,image_batch_lr4])
-#    generated_image = denormalize(gen_img)
-#    image_batch_lr = denormalize(image_batch_lr)
-
-    #generated_image = deprocess_HR(generator.predict(image_batch_lr))
     for index in range(examples):
             if (val==False):
-             image_batch_hr[index]=(image_batch_hr[index]).reshape(128, 128)
+              image_batch_hr[index]=(image_batch_hr[index]).reshape(128, 128)
+            ## plot GT
             fig=plt.figure(figsize=figsize)
-            #combined_data = np.array([ image_batch_hr[index], generated_image[index].reshape(128, 128) ])
-            #_min, _max = np.amin(combined_data), np.amax(combined_data)
-            # _vmin1 = (image_batch_hr[index]).min()
-            # _vmax1 = (image_batch_hr[index]).max()
-            #
-            # _vmin2 = (generated_image[index]).min()
-            # _vmax2 = (generated_image[index]).max()
-            # vmin= min(vmin , min(_vmin1, _vmin2))
-            # vmax = max(vmax, min(_vmax1, _vmax2))
-
-#        	ax1=plt.subplot(dim[0], dim[1], 1)
             ax1=plt.subplot(dim[0], dim[1], 1)
             ax1.set_title('GT', color=fg_color)
-            imgn = np.flipud(image_batch_hr[index]) #/ np.linalg.norm(image_batch_hr[index])
-            im1 = ax1.imshow(imgn.reshape(128, 128))  # , interpolation='nearest')
-            # im1=ax1.imshow(image_batch_hr[index].reshape(128, 128))#,vmin = _min, vmax = _max)#, interpolation='nearest')
+            imgn = np.flipud(image_batch_hr[index]) 
+            im1 = ax1.imshow(imgn.reshape(128, 128))  
             divider = make_axes_locatable(ax1)
             cax = divider.append_axes('right', size='5%', pad=0.05)
             ax1.axis('off')
             fig.colorbar(im1, cax=cax, orientation='vertical')
 
-
-
+            ## plot Rec1
             ax2=plt.subplot(dim[0], dim[1], 2)
-            imgnr = np.flipud(generated_image_1[index]) #/ np.linalg.norm(image_batch_hr[index])
+            imgnr = np.flipud(generated_image_1[index]) 
             ax2.set_title('Recons_f1', color=fg_color)
-            im2=plt.imshow(imgnr.reshape(128, 128))#,vmin = _min, vmax = _max)#, interpolation='nearest')
+            im2=plt.imshow(imgnr.reshape(128, 128))
             divider = make_axes_locatable(ax2)
             cax = divider.append_axes('right', size='5%', pad=0.05)
             ax2.axis('off')
             fig.colorbar(im2, cax=cax, orientation='vertical')
 
+            ## plot Rec2
             ax3=plt.subplot(dim[0], dim[1], 3)
-            imgnr = np.flipud(generated_image_2[index]) #/ np.linalg.norm(image_batch_hr[index])
+            imgnr = np.flipud(generated_image_2[index]) 
             ax3.set_title('Recons_f2', color=fg_color)
-            im2=plt.imshow(imgnr.reshape(128, 128))#,vmin = _min, vmax = _max)#, interpolation='nearest')
+            im2=plt.imshow(imgnr.reshape(128, 128))
             divider = make_axes_locatable(ax3)
             cax = divider.append_axes('right', size='5%', pad=0.05)
             ax3.axis('off')
             fig.colorbar(im2, cax=cax, orientation='vertical')
 
+            ## plot Rec3
             ax4=plt.subplot(dim[0], dim[1], 4)
-            imgnr = np.flipud(generated_image_3[index]) #/ np.linalg.norm(image_batch_hr[index])
+            imgnr = np.flipud(generated_image_3[index]) 
             ax4.set_title('Recons_f3', color=fg_color)
-            im2=plt.imshow(imgnr.reshape(128, 128))#,vmin = _min, vmax = _max)#, interpolation='nearest')
+            im2=plt.imshow(imgnr.reshape(128, 128))
             divider = make_axes_locatable(ax4)
             cax = divider.append_axes('right', size='5%', pad=0.05)
             ax4.axis('off')
             fig.colorbar(im2, cax=cax, orientation='vertical')
 
+            ## plot Rec4
             ax5=plt.subplot(dim[0], dim[1], 5)
-            imgnr = np.flipud(generated_image_4[index]) #/ np.linalg.norm(image_batch_hr[index])
+            imgnr = np.flipud(generated_image_4[index]) 
             ax5.set_title('Recons_f4', color=fg_color)
-            im2=plt.imshow(imgnr.reshape(128, 128))#,vmin = _min, vmax = _max)#, interpolation='nearest')
+            im2=plt.imshow(imgnr.reshape(128, 128))
             divider = make_axes_locatable(ax5)
             cax = divider.append_axes('right', size='5%', pad=0.05)
             ax5.axis('off')
             fig.colorbar(im2, cax=cax, orientation='vertical')
 
+            ## plot Rec_fusion
             ax6=plt.subplot(dim[0], dim[1], 6)
-            imgnr = np.flipud(generated_image_f[index]) #/ np.linalg.norm(image_batch_hr[index])
+            imgnr = np.flipud(generated_image_f[index]) 
             ax6.set_title('Recons_all', color=fg_color)
-            im2=plt.imshow(imgnr.reshape(128, 128))#,vmin = _min, vmax = _max)#, interpolation='nearest')
+            im2=plt.imshow(imgnr.reshape(128, 128))
             divider = make_axes_locatable(ax6)
             cax = divider.append_axes('right', size='5%', pad=0.05)
             ax6.axis('off')
             fig.colorbar(im2, cax=cax, orientation='vertical')
-
-
             plt.tight_layout(pad=0.01)
             plt.savefig(dirfile+ '-' +str(index)+'.png' )
-            #a=image_batch_hr[index]
-
-#            a=cv2.normalize( image_batch_hr[index],None, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
-            #b=generated_image[index]#
-#            b=cv2.normalize( generated_image[index],None, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
+                
+            ## compute metrics
             v=calculateDistance (generated_image_f[index],image_batch_hr[index])#
             DistanceROI.append(v)
-#            mse=mean_squared_error(a,b)
-#            mselist.append(mse)
-            p=psnr(generated_image_f[index],image_batch_hr[index])#(y_te[i],decoded_imgs[i].reshape(128, 128)) #(a.reshape(128, 128),b)#
+            p=psnr(generated_image_f[index],image_batch_hr[index])
             psnrlist.append(p)
             ss_im = ssim(image_batch_hr[index].reshape(128, 128), generated_image_f[index].reshape(128, 128))
             ssimlist.append(ss_im)
-#        	if min(image_batch_hr[index])==max(generated_image[index]):
-#        		threshold_GT = filter.threshold_otsu(a)
-#        		threshold_Rec = filter.threshold_otsu(b)
-#    #    plt.imshow(a > threshold_GT )
-#        		gt=a > threshold_GT
-#
-#        		seg=b > 0.6
-            #dice = np.sum(seg[gt==1])*2.0 / (np.sum(seg) + np.sum(gt))
-#        		dices= Dice(gt,seg)
-#        		dices=jaccard_similarity_score(gt,seg)
-#        		Dicelist.append(dices)
             fjacc= FuzzyJaccard(image_batch_hr[index],generated_image_f[index])
             FJaccard.append(fjacc)
             plt.close("all")
-            PD_label.append(label[index])
-            GT_label.append(y_testlabel[index])
+            # PD_label.append(label[index])
+            # GT_label.append(y_testlabel[index])
     FJ_mean= np.mean(FJaccard)
     FJ_std= np.std(FJaccard)
     DistanceROI_mean= np.mean(DistanceROI)
     DistanceROI_std= np.std(DistanceROI)
-#    mse_mean=np.mean(mselist)
-#    mse_std=np.std(mselist)
     psnr_mean=np.mean(psnrlist)
     psnr_std=np.std(psnrlist)
     ssim_mean=np.mean(ssimlist)
     ssim_std=np.std(ssimlist)
-#    dice_mean=np.mean(Dicelist)
-#    dice_std=np.std(Dicelist)
-    loss_file = open('results/losses.txt' , 'a')
+    loss_file = open( dir+ '/losses.txt' , 'a')
     if (val == True):
         loss_file.write('synthe  epoch%d :  DistanceROI = %s + ~  %s ; psnr_mean = %s + ~  %s ; ssim_mean = %s + ~  %s ; FuzzyJaccard_mean = %s + ~ %s \n' %(epoch, DistanceROI_mean, DistanceROI_std,psnr_mean,psnr_std,ssim_mean, ssim_std, FJ_mean, FJ_std ) )
     if Tmp_ssimlist<ssim_mean:
-        generator.save('./results/Checkpoint.h5')
+        generator.save( dir+ '/Checkpoint.h5')
         print('ssim improved from %s to %s, saving model to weight\n' %(Tmp_ssimlist, ssim_mean))
         Tmp_ssimlist = ssim_mean
-    loss_file = open('results/losses_acc.txt' , 'a')
+    loss_file = open( dir+ '/losses_acc.txt' , 'a')
     if (val == True):
         loss_file.write('synthe  epoch%d :  GT_label = %s ; label = %s  \n' %(epoch, GT_label, label ) )
-
-
-#    loss_file.write('epoch%d : DistanceROI_mean = %s + ~ %s ;  psnr_mean = %s + ~  %s  ; FuzzyJaccard_mean = %s + ~ %s \n' %(epoch, DistanceROI_mean,DistanceROI_std, psnr_mean,psnr_std, FJ_mean, FJ_std ) )
-    loss_file.close()
-
-
-
-#    loss_file.write('epoch%d : DistanceROI_mean = %s + ~ %s ;  psnr_mean = %s + ~  %s  ; FuzzyJaccard_mean = %s + ~ %s \n' %(epoch, DistanceROI_mean,DistanceROI_std, psnr_mean,psnr_std, FJ_mean, FJ_std ) )
     loss_file.close()
 
 def plot_confusion_matrix(cm, title='Confusion matrix', cmap=plt.cm.Blues):
@@ -593,13 +570,13 @@ def plot_confusion_matrix(cm, title='Confusion matrix', cmap=plt.cm.Blues):
         plt.ylabel('Actual Class')
         plt.xlabel('Predicted Class')
 
-def plot_confusionmatrix(epoch,RToT_model):
+def plot_confusionmatrix(epoch, measure_1, measure_2, measure_3, measure_4, y_testlabel,RToT_model):
 
     #  Y_pred = RToT_model.predict([x_test_lr_1, x_test_lr_2, x_test_lr_3,x_test_lr_4])
     
     # y_pred = np.argmax(Y_pred, axis=1)
     # cm=confusion_matrix(y_test, y_pred)
-    Y_pred, Im_pred_1,Im_pred_2, Im_pred_3,Im_pred_4, Im_pred_f = RToT_model.predict([x_test_lr_1, x_test_lr_2, x_test_lr_3,x_test_lr_4])
+    Y_pred, Im_pred_1,Im_pred_2, Im_pred_3,Im_pred_4, Im_pred_f = RToT_model.predict([measure_1, measure_2, measure_3, measure_4])
     y_pred = np.argmax(Y_pred, axis=1)
     # print(Y_pred)
     # print(y_pred)
@@ -615,7 +592,6 @@ def plot_confusionmatrix(epoch,RToT_model):
     report = classification_report(y_testlabel, y_pred, output_dict=True)
     df = pd.DataFrame(report).transpose()
     df.to_csv('results/Classification_Report_file.txt',  header=True, index=False, sep='\t', mode='a')
-    # Classification_Report_file.write('synthe  epoch%d :  classification_report%s \n' %(epoch, df))
     Classification_Report_file.close()
 
 
