@@ -61,7 +61,7 @@ if not os.path.exists(final_directory):
 
 def initializer(name=None,logs={}):
         global lgr
-        configuration = {'epochs':25,'loss':'mse', 'lr':0.00001, 'seed':2, 'device':'gpu', 'arch':'Raw-to-task++', 'batchsize':16, 'alpha':0.2, 'beta':0.25, 'gamma':0.5, 
+        configuration = {'epochs':25,'loss':'mse', 'lr':0.0001, 'seed':2, 'device':'gpu', 'arch':'Raw-to-task++', 'batchsize':16, 'alpha':0.2, 'beta':0.25, 'gamma':0.5, 
                   'checkpoint': None, 'datasetdirectory':'/local-scratch/Hanene/Data/multi-freq/Data/', 'outputfolder': "results", 'checkpointdirectory':'.', 'mode':'train'}
 
         
