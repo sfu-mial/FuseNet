@@ -53,14 +53,6 @@ logger.setLevel(logging.INFO)
 from numpy.random import seed
 
 
-image_shape =  (128,128,1)
-mean_DistanceROI = []
-mean_mselist = []
-mean_psnrlist = []
-mean_ssimlist = []
-mean_Dicelist = []
-mean_FJaccard = []
-
 
 # current_directory = os.getcwd()
 # final_directory = os.path.join(current_directory, 'results')
