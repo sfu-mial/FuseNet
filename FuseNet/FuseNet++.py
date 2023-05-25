@@ -150,8 +150,8 @@ def train(epochs, batch_size, alpha,beta,gamma,arch,dir):
     validation_split=0.1,
     # validation_data=(x_test_lr,x_test_hr),
     callbacks = [plot_losses,checkpoint,LearningRateReducerCb(),reduce_lr])#,lr_decay_callback,change_lr
-    plot_generated_images(epochs, model, dir, measure_1, measure_2, measure_3, measure_4, x_train,label,True)
-    plot_confusionmatrix(epochs, model,dir, measure_1, measure_2, measure_3, measure_4, label)
+    plot_generated_images(epochs, model, dir, testmeasure_1, testmeasure_2, testmeasure_3, testmeasure_4, x_test,label_test,True)
+    plot_confusionmatrix(epochs, model,dir, testmeasure_1, testmeasure_2, testmeasure_3, testmeasure_4, label_test)
     # plot_roc_curve(model)
 
 if __name__ == "__main__":
@@ -168,7 +168,7 @@ if __name__ == "__main__":
     dataset_dir = conf['datasetdirectory']
     outputfolder=  conf['outputfolder']
     print (dataset_dir)
-    measure_1,measure_2,measure_3,measure_4, x_train, label, testmeasure_1,testmeasure_2,testmeasure_3,testmeasure_4,immatrix_test ,label_test=load_data(dataset_dir)
+    measure_1,measure_2,measure_3,measure_4, x_train, label, testmeasure_1,testmeasure_2,testmeasure_3,testmeasure_4,x_test ,label_test=load_data(dataset_dir)
     print("data loaded")
     train(epochs,batchsize, alpha,beta,gamma,arch,outputfolder )
 

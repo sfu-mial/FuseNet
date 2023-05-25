@@ -420,14 +420,11 @@ def loss_r(alpha, Beta,batch_size):
         return custom_loss_r(y_true, y_pred, alpha, Beta,batch_size)
     return custom_loss_func_r
 
-def custom_loss_r(y_true, y_pred, alpha, Beta,batch_size):  # orthogonal_loss
-    loss =losses.mean_squared_error(y_true, y_pred)# was 1*   mean_squared_error
-#    loss +=losses.mean_absolute_error(y_true, y_pred)# was 1*   mean_squared_error
-
-    loss+= Beta*FuzzyJaccard_distance_loss(y_true, y_pred)#  Beta* was 0.4, 0.3
+def custom_loss_r(y_true, y_pred, alpha, Beta,batch_size):  
+    loss =losses.mean_squared_error(y_true, y_pred)
+    loss+= Beta*FuzzyJaccard_distance_loss(y_true, y_pred)
     loss +=alpha* dst_transform(y_true, y_pred)
-#    loss +=second_derivative(y_true, y_pred)#dst_transform(y_true, y_pred)
-    # loss+= 0.3*vgg_loss(y_true, y_pred)
+
     return  loss
 
 def plot_generated_images(epoch, generator,dir,measure_1, measure_2, measure_3, measure_4, x_train, GT_label,val =True, examples=20, dim=(1, 6), figsize=(10, 5)):
@@ -529,8 +526,7 @@ def plot_generated_images(epoch, generator,dir,measure_1, measure_2, measure_3, 
             fjacc= FuzzyJaccard(image_batch_hr[index],generated_image_f[index])
             FJaccard.append(fjacc)
             plt.close("all")
-            # PD_label.append(label[index])
-            # GT_label.append(y_testlabel[index])
+ 
     FJ_mean= np.mean(FJaccard)
     FJ_std= np.std(FJaccard)
     DistanceROI_mean= np.mean(DistanceROI)
