@@ -586,15 +586,10 @@ def plot_confusionmatrix(epoch,RToT_model,dir, measure_1, measure_2, measure_3, 
     print(y_testlabel.shape, y_pred.shape)
     print(classification_report(y_testlabel, y_pred, target_names=target_names))
     Classification_Report_file = open(dir+'/losses.txt' , 'a')
-    # report = classification_report(y_testlabel, y_pred, output_dict=True)
-    # df = pd.DataFrame(report).transpose()
-    # df.to_csv('results/Classification_Report_file.txt',  header=True, index=False, sep='\t', mode='a')
-    # Classification_Report_file.close()
-
 
     plt.figure()
     plot_confusion_matrix(cm)
-    dirfile='results/confusion_matrix'
+    dirfile=dir+'/confusion_matrix'
     plt.savefig(dirfile+ '-'+'.png' )
     plt.close("all")
 
@@ -606,7 +601,7 @@ def plot_confusionmatrix(epoch,RToT_model,dir, measure_1, measure_2, measure_3, 
     print(cm_normalized)
     plt.figure()
     plot_confusion_matrix(cm_normalized, title='Normalized confusion matrix')
-    dirfile='results/Normalized_confusion_matrix'
+    dirfile=dir+'/Normalized_confusion_matrix'
     plt.savefig(dirfile+ '-'+'.png' )
     plt.close("all")
 
