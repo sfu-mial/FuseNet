@@ -570,7 +570,7 @@ def plot_confusion_matrix(cm, title='Confusion matrix', cmap=plt.cm.Blues):
         plt.ylabel('Actual Class')
         plt.xlabel('Predicted Class')
 
-def plot_confusionmatrix(epoch, measure_1, measure_2, measure_3, measure_4, y_testlabel,RToT_model):
+def plot_confusionmatrix(epoch,RToT_model, measure_1, measure_2, measure_3, measure_4, y_testlabel):
 
     #  Y_pred = RToT_model.predict([x_test_lr_1, x_test_lr_2, x_test_lr_3,x_test_lr_4])
     
