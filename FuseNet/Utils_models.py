@@ -126,51 +126,7 @@ def FuzzyJaccard (im1,im2):
     union= minAB.sum()/maxAB.sum()
     return union
 
-def plot_confusion_matrix(cm, title='Confusion matrix', cmap=plt.cm.Blues):
-    ##https://scikit-learn.org/0.16/auto_examples/model_selection/plot_confusion_matrix.html#example-model-selection-plot-confusion-matrix-py
-    plt.imshow(cm, interpolation='nearest', cmap=cmap)
-    plt.title(title)
-    plt.colorbar()
-    tick_marks = np.arange(len(y_test))
-    tick_marks = np.arange(3)
-    classes=['healthy', 'malign', 'Benign']
-    plt.xticks(tick_marks, classes, rotation=45)
-    plt.yticks(tick_marks, classes)
-    plt.tight_layout()
-    plt.ylabel('True label')
-    plt.xlabel('Predicted label')    
 
-    thresh = cm.max()/2
-
-    for i,j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-        plt.text(j,i, cm[i,j], horizontalalignment='center', color='white' if cm[i,j] > thresh else 'black', fontsize=25, fontweight='bold')
-        plt.tight_layout()
-        plt.ylabel('Actual Class')
-        plt.xlabel('Predicted Class')
-
-def plot_confusionmatrix(epoch,RToT_model):
-    Y_pred, Im_pred = RToT_model.predict(x_test)
-    y_pred = np.argmax(Y_pred, axis=1)
-    cm=confusion_matrix(y_test, y_pred)
-    print('Classification Report')
-    target_names = ['healthy', 'malign', 'Benign']
-    print(classification_report(y_test, y_pred, target_names=target_names))
-    plt.figure()
-    plot_confusion_matrix(cm)
-    dirfile='mse/confusion_matrix'
-    plt.savefig(dirfile+ '-'+'.png' )
-    plt.close("all")
-
-    cm_normalized = np.around(cm.astype('float') / cm.sum(axis=1)[:, np.newaxis],decimals=2)
-    print('Normalized confusion matrix')
-    print(cm_normalized)
-    plt.figure()
-    plot_confusion_matrix(cm_normalized, title='Normalized confusion matrix')
-    dirfile='mse/Normalized_confusion_matrix'
-    plt.savefig(dirfile+ '-'+'.png' )
-    plt.close("all")
-
-## losses
 def FuzzyJaccard_distance_loss(y_true, y_pred,  n_channels=1):
  	jac = 0
  	for c in range(n_channels):
@@ -556,12 +512,6 @@ def plot_confusion_matrix(cm, title='Confusion matrix', cmap=plt.cm.Blues):
         plt.xlabel('Predicted Class')
 
 def plot_confusionmatrix(epoch,dir, y_pred,y_testlabel):
-    # Y_pred, Im_pred_1,Im_pred_2, Im_pred_3,Im_pred_4, Im_pred_f = RToT_model.predict([measure_1, measure_2, measure_3, measure_4])
-    # y_pred = np.argmax(Y_pred, axis=1)
-    # y_testlabel= np.argmax(y_label,1) 
-    # # print(y_testlabel)
-    # # print(y_pred)
-
     cm=confusion_matrix(y_testlabel, y_pred)
     print('Classification Report')
     target_names = ['healthy', 'Benign', 'malign']
