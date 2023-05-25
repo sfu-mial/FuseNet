@@ -73,7 +73,7 @@ class Models(object):
 
         ### Task_branch'''
 	
-	    feature_clas,  out_r_task = diagnosis_block(out_r_fuse, 64, 3, 1)
+	    feature_clas,  out_r_task = diagnosis_block(out_r_fuse, 64, 3, 1,initializers=normal, shape= target_shape)
 
 	    generator_model = Model(inputs = [input0, input1, input2, input3],  outputs = [out_r_task,out_r1, out_r2, out_r3, out_r4,out_r_fuse])
 	    generator_model.summary([])
@@ -105,8 +105,9 @@ class Models(object):
        
 
         ### Task_branch'''
-	
-	    feature_clas,  out_r_task = diagnosis_block(gen_input, 64, 3, 1)
+	    model= Dense( 128*128, activation = 'relu', kernel_initializer='glorot_normal')(gen_input)
+	    model = keras.layers.Reshape(target_shape)(model)
+	    feature_clas,  out_r_task = diagnosis_block(model, 64, 3, 1,initializers=normal, shape= target_shape)
 
 	    generator_model = Model(inputs = [input0, input1, input2, input3],  outputs = [out_r_task])
 	    generator_model.summary([])

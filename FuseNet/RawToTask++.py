@@ -122,7 +122,7 @@ def train(epochs, batch_size, alpha,beta,gamma,arch,dir):
  
         model.compile(   
             loss =  { "category_output":  model_loss_fuse },
-            metrics = {"reconstruction_output_fuse": 'accuracy' },
+            metrics = {"category_output": 'accuracy' },
             optimizer=tf.keras.optimizers.Adam(0.0001, beta_1=0.9, beta_2=0.98, epsilon=1e-9)
         )
     elif arch== 'Raw-to-task':
@@ -131,15 +131,19 @@ def train(epochs, batch_size, alpha,beta,gamma,arch,dir):
         model_loss= loss_r(alpha, beta,batch_size) 
         model.compile (   
             loss =  { "category_output": tf.keras.losses.CategoricalCrossentropy() },
-            metrics = { "reconstruction_output_fuse": 'accuracy'  },
+            metrics = { "category_output": 'accuracy'  },
             optimizer=tf.keras.optimizers.Adam(0.0001, beta_1=0.9, beta_2=0.98, epsilon=1e-9)
         )
 
 
-    history =model.fit([measure_1, measure_2, measure_3, measure_4], [label,x_train, x_train, x_train, x_train, x_train], epochs=epochs, batch_size=batch_size, shuffle=True,
+    history =model.fit([measure_1, measure_2, measure_3, measure_4], [label], epochs=epochs, batch_size=batch_size, shuffle=True,
     validation_split=0.1, callbacks = [plot_losses,checkpoint,LearningRateReducerCb(),reduce_lr])
-    
-    plot_confusionmatrix(epochs, model,dir, testmeasure_1, testmeasure_2, testmeasure_3, testmeasure_4, label_test)
+    Y_pred = model.predict([testmeasure_1, testmeasure_2, testmeasure_3, testmeasure_4])
+    y_pred = np.argmax(Y_pred, axis=1)
+    y_testlabel= np.argmax(label_test,1) 
+    print(y_testlabel.shape)
+    print(y_pred.shape)
+    plot_confusionmatrix(epochs,dir, y_pred,y_testlabel)
     # plot_roc_curve(model)
 
 if __name__ == "__main__":

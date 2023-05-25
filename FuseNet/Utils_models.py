@@ -427,7 +427,7 @@ def custom_loss_r(y_true, y_pred, alpha, Beta,batch_size):
 
     return  loss
 
-def plot_generated_images(epoch, generator,dir,measure_1, measure_2, measure_3, measure_4, x_train, GT_label,val =True, examples=20, dim=(1, 6), figsize=(10, 5)):
+def plot_generated_images(epoch,generator, dir,generated_image_1 ,generated_image_2, generated_image_3 ,generated_image_4, generated_image_f, x_train, GT_label,val =True, examples=20, dim=(1, 6), figsize=(10, 5)):
     fg_color = 'black'
     bg_color =  'white'
     DistanceROI = []
@@ -441,23 +441,14 @@ def plot_generated_images(epoch, generator,dir,measure_1, measure_2, measure_3, 
     # PD_label=[]
     # GT_label=[]
     global Tmp_ssimlist
-    if (val ==True):
-        image_batch_hr = x_train[:,:]
-        image_batch_lr1 = measure_1[:,:]
-        image_batch_lr2 = measure_2[:,:]
-        image_batch_lr3 = measure_3[:,:]
-        image_batch_lr4 = measure_4[:,:]
-        dirfile= dir+ '/test_generated_image_'
-    
-    label, generated_image_1 ,generated_image_2, generated_image_3 ,generated_image_4, generated_image_f = generator.predict([image_batch_lr1,image_batch_lr2,image_batch_lr3,image_batch_lr4])
+    dirfile= dir+ '/test_generated_image_'
+
     for index in range(examples):
-            if (val==False):
-              image_batch_hr[index]=(image_batch_hr[index]).reshape(128, 128)
             ## plot GT
             fig=plt.figure(figsize=figsize)
             ax1=plt.subplot(dim[0], dim[1], 1)
             ax1.set_title('GT', color=fg_color)
-            imgn = np.flipud(image_batch_hr[index]) 
+            imgn = np.flipud(x_train[index]) 
             im1 = ax1.imshow(imgn.reshape(128, 128))  
             divider = make_axes_locatable(ax1)
             cax = divider.append_axes('right', size='5%', pad=0.05)
@@ -517,13 +508,13 @@ def plot_generated_images(epoch, generator,dir,measure_1, measure_2, measure_3, 
             plt.savefig(dirfile+ '-' +str(index)+'.png' )
                 
             ## compute metrics
-            v=calculateDistance (generated_image_f[index],image_batch_hr[index])#
+            v=calculateDistance (generated_image_f[index],x_train[index])#
             DistanceROI.append(v)
-            p=psnr(generated_image_f[index],image_batch_hr[index])
+            p=psnr(generated_image_f[index],x_train[index])
             psnrlist.append(p)
-            ss_im = ssim(image_batch_hr[index].reshape(128, 128), generated_image_f[index].reshape(128, 128))
+            ss_im = ssim(x_train[index].reshape(128, 128), generated_image_f[index].reshape(128, 128))
             ssimlist.append(ss_im)
-            fjacc= FuzzyJaccard(image_batch_hr[index],generated_image_f[index])
+            fjacc= FuzzyJaccard(x_train[index],generated_image_f[index])
             FJaccard.append(fjacc)
             plt.close("all")
  
@@ -542,10 +533,6 @@ def plot_generated_images(epoch, generator,dir,measure_1, measure_2, measure_3, 
         generator.save( dir+ '/Checkpoint.h5')
         print('ssim improved from %s to %s, saving model to weight\n' %(Tmp_ssimlist, ssim_mean))
         Tmp_ssimlist = ssim_mean
-    loss_file = open( dir+ '/losses_acc.txt' , 'a')
-    if (val == True):
-        loss_file.write('synthe  epoch%d :  GT_label = %s ; label = %s  \n' %(epoch, GT_label, label ) )
-    loss_file.close()
 
 def plot_confusion_matrix(cm, title='Confusion matrix', cmap=plt.cm.Blues):
     ##https://scikit-learn.org/0.16/auto_examples/model_selection/plot_confusion_matrix.html#example-model-selection-plot-confusion-matrix-py
@@ -568,13 +555,12 @@ def plot_confusion_matrix(cm, title='Confusion matrix', cmap=plt.cm.Blues):
         plt.ylabel('Actual Class')
         plt.xlabel('Predicted Class')
 
-def plot_confusionmatrix(epoch,RToT_model,dir, measure_1, measure_2, measure_3, measure_4, y_label):
-    Y_pred, Im_pred_1,Im_pred_2, Im_pred_3,Im_pred_4, Im_pred_f = RToT_model.predict([measure_1, measure_2, measure_3, measure_4])
-    y_pred = np.argmax(Y_pred, axis=1)
-
-    y_testlabel= np.argmax(y_label,1) 
-    print(y_testlabel)
-    print(y_pred)
+def plot_confusionmatrix(epoch,dir, y_pred,y_testlabel):
+    # Y_pred, Im_pred_1,Im_pred_2, Im_pred_3,Im_pred_4, Im_pred_f = RToT_model.predict([measure_1, measure_2, measure_3, measure_4])
+    # y_pred = np.argmax(Y_pred, axis=1)
+    # y_testlabel= np.argmax(y_label,1) 
+    # # print(y_testlabel)
+    # # print(y_pred)
 
     cm=confusion_matrix(y_testlabel, y_pred)
     print('Classification Report')

@@ -157,9 +157,13 @@ def train(epochs, batch_size, alpha,beta,gamma,arch,dir):
 
     history =model.fit([measure_1, measure_2, measure_3, measure_4], [label,x_train, x_train, x_train, x_train, x_train], epochs=epochs, batch_size=batch_size, shuffle=True,
     validation_split=0.1, callbacks = [plot_losses,checkpoint,LearningRateReducerCb(),reduce_lr])
-    
-    plot_generated_images(epochs, model, dir, testmeasure_1, testmeasure_2, testmeasure_3, testmeasure_4, x_test,label_test,True)
-    plot_confusionmatrix(epochs, model,dir, testmeasure_1, testmeasure_2, testmeasure_3, testmeasure_4, label_test)
+    Y_pred, Im_pred_1,Im_pred_2, Im_pred_3,Im_pred_4, Im_pred_f = model.predict([testmeasure_1, testmeasure_2, testmeasure_3, testmeasure_4])
+    y_pred = np.argmax(Y_pred, axis=1)
+    y_testlabel= np.argmax(label_test,1) 
+    # print(y_testlabel)
+    # print(y_pred)
+    plot_generated_images(epochs,model, dir, Im_pred_1,Im_pred_2, Im_pred_3,Im_pred_4, Im_pred_f, x_test,label_test,True)
+    plot_confusionmatrix(epochs,dir, y_pred,y_testlabel)
     # plot_roc_curve(model)
 
 if __name__ == "__main__":

@@ -82,9 +82,9 @@ def reconst_block(input, filters, initializers, shape):
     return model
 
 
-def diagnosis_block(model, filters, kernel_size, strides):
-    
-    model = Conv2D(filters = filters, kernel_size = kernel_size, strides = strides, padding = "same")(model)
+def diagnosis_block(input, filters, kernel_size, strides,initializers, shape):
+
+    model = Conv2D(filters = filters, kernel_size = kernel_size, strides = strides, padding = "same")(input)
     model = BatchNormalization(momentum = 0.5)(model)
     model = LeakyReLU(alpha = 0.2)(model)
     
