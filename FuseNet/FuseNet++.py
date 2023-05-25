@@ -54,10 +54,10 @@ from numpy.random import seed
 
 
 
-# current_directory = os.getcwd()
-# final_directory = os.path.join(current_directory, 'results')
-# if not os.path.exists(final_directory):
-#    os.makedirs(final_directory)
+current_directory = os.getcwd()
+final_directory = os.path.join(current_directory, 'results')
+if not os.path.exists(final_directory):
+   os.makedirs(final_directory)
 
 def initializer(name=None,logs={}):
         global lgr
@@ -88,7 +88,7 @@ def initializer(name=None,logs={}):
         OUTPUTROOT = configuration['outputfolder']
         # outputdirectory = os.path.join(OUTPUTROOT)#, "{}_{}_{}".format(datetime.now().strftime("%Y%m%d_%Hh%Mm%Ss"), str(np.random.randint(1000)), configuration['seed']))
         current_directory = os.getcwd()
-        outputdirectory = os.path.join(current_directory, 'outputfolder')
+        outputdirectory = os.path.join(current_directory, OUTPUTROOT)
         if not os.path.exists(outputdirectory):
             os.makedirs(outputdirectory) 
         configuration['outputdirectory'] = outputdirectory
@@ -151,7 +151,7 @@ def train(epochs, batch_size, alpha,beta,gamma,arch,dir):
     # validation_data=(x_test_lr,x_test_hr),
     callbacks = [plot_losses,checkpoint,LearningRateReducerCb(),reduce_lr])#,lr_decay_callback,change_lr
     plot_generated_images(epochs, model, dir, measure_1, measure_2, measure_3, measure_4, x_train,label,True)
-    plot_confusionmatrix(epochs, model, measure_1, measure_2, measure_3, measure_4, label)
+    plot_confusionmatrix(epochs, model,dir, measure_1, measure_2, measure_3, measure_4, label)
     # plot_roc_curve(model)
 
 if __name__ == "__main__":

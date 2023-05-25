@@ -10,6 +10,7 @@ from keras.models import Model
 from tensorflow.keras.optimizers import Adam
 from keras.models import model_from_json
 import os
+import itertools
 import numpy as np
 import pandas as pd
 import glob
@@ -36,6 +37,8 @@ from  skimage.metrics import structural_similarity as ssim
 import skimage
 print(skimage.__version__)
 from keras import losses
+from sklearn.preprocessing import label_binarize
+
 global Tmp_ssimlist
 Tmp_ssimlist = 0
 class VGG_LOSS(object):
@@ -553,7 +556,6 @@ def plot_confusion_matrix(cm, title='Confusion matrix', cmap=plt.cm.Blues):
     plt.imshow(cm, interpolation='nearest', cmap=cmap)
     plt.title(title)
     plt.colorbar()
-    tick_marks = np.arange(len(y_test))
     tick_marks = np.arange(3)
     classes=['healthy', 'Benign', 'malign']
     plt.xticks(tick_marks, classes, rotation=45)
@@ -570,29 +572,24 @@ def plot_confusion_matrix(cm, title='Confusion matrix', cmap=plt.cm.Blues):
         plt.ylabel('Actual Class')
         plt.xlabel('Predicted Class')
 
-def plot_confusionmatrix(epoch,RToT_model, measure_1, measure_2, measure_3, measure_4, y_testlabel):
-
-    #  Y_pred = RToT_model.predict([x_test_lr_1, x_test_lr_2, x_test_lr_3,x_test_lr_4])
-    
-    # y_pred = np.argmax(Y_pred, axis=1)
-    # cm=confusion_matrix(y_test, y_pred)
+def plot_confusionmatrix(epoch,RToT_model,dir, measure_1, measure_2, measure_3, measure_4, y_label):
     Y_pred, Im_pred_1,Im_pred_2, Im_pred_3,Im_pred_4, Im_pred_f = RToT_model.predict([measure_1, measure_2, measure_3, measure_4])
     y_pred = np.argmax(Y_pred, axis=1)
-    # print(Y_pred)
-    # print(y_pred)
-    # lb = preprocessing.LabelBinarizer()
-    # print(lb.transform(y_pred))
-    # print(y_testlabel)
+
+    y_testlabel= np.argmax(y_label,1) 
+    print(y_testlabel)
+    print(y_pred)
+
     cm=confusion_matrix(y_testlabel, y_pred)
     print('Classification Report')
     target_names = ['healthy', 'Benign', 'malign']
     print(y_testlabel.shape, y_pred.shape)
     print(classification_report(y_testlabel, y_pred, target_names=target_names))
-    Classification_Report_file = open('results/losses.txt' , 'a')
-    report = classification_report(y_testlabel, y_pred, output_dict=True)
-    df = pd.DataFrame(report).transpose()
-    df.to_csv('results/Classification_Report_file.txt',  header=True, index=False, sep='\t', mode='a')
-    Classification_Report_file.close()
+    Classification_Report_file = open(dir+'/losses.txt' , 'a')
+    # report = classification_report(y_testlabel, y_pred, output_dict=True)
+    # df = pd.DataFrame(report).transpose()
+    # df.to_csv('results/Classification_Report_file.txt',  header=True, index=False, sep='\t', mode='a')
+    # Classification_Report_file.close()
 
 
     plt.figure()
