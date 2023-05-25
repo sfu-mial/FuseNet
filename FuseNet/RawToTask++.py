@@ -61,7 +61,7 @@ if not os.path.exists(final_directory):
 
 def initializer(name=None,logs={}):
         global lgr
-        configuration = {'epochs':25,'loss':'mse', 'lr':0.00001, 'seed':2, 'device':'gpu', 'arch':'FuseNet++', 'batchsize':16, 'alpha':0.2, 'beta':0.25, 'gamma':0.5, 
+        configuration = {'epochs':25,'loss':'mse', 'lr':0.00001, 'seed':2, 'device':'gpu', 'arch':'Raw-to-task++', 'batchsize':16, 'alpha':0.2, 'beta':0.25, 'gamma':0.5, 
                   'checkpoint': None, 'datasetdirectory':'/local-scratch/Hanene/Data/multi-freq/Data/', 'outputfolder': "results", 'checkpointdirectory':'.', 'mode':'train'}
 
         
@@ -70,7 +70,7 @@ def initializer(name=None,logs={}):
         parser.add_argument('--batchsize', type=int, nargs='?', help='Int, >0, batchsize, default 16')
         parser.add_argument('--outputfolder', type=str, nargs='?', help='Output folder')
         parser.add_argument('--mode', type=str, nargs='?', help='train [def], evaluate, resume')
-        parser.add_argument('--arch', type=str, nargs='?', help='FuseNet [def], FuseNet++, Raw-to-task, Raw-to-task++, SF-JRD,SF-DP')
+        parser.add_argument('--arch', type=str, nargs='?', help='Raw-to-task++ [def], Raw-to-task')
         parser.add_argument('--datasetdirectory', type=str, nargs='?', help='Path where tif images are stored')
         parser.add_argument('--lr', type=float, nargs='?', help='Float, >0, Learning Rate, default 0.0001')
         # parser.add_argument('--checkpointdirectory', type=str, nargs='?', help='checkpoint directory to resume')
@@ -107,58 +107,38 @@ def initializer(name=None,logs={}):
 
 
 def train(epochs, batch_size, alpha,beta,gamma,arch,dir):
-    alpha = K.variable(alpha)#(0.1)
-    beta = K.variable(beta)#(0.02)
-    gamma = K.variable(gamma)#(0.02)
+    alpha = K.variable(alpha)
+    beta = K.variable(beta)
+    gamma = K.variable(gamma)
     shape = (256,)
     keras.callbacks.Callback()
     reduce_lr = keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=5, min_lr=0.000001, verbose=0, mode='auto') #ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=5, min_lr=0.00001)
     change_lr = LearningRateScheduler(scheduler)
     filepath= dir+'/weights-improvement-{epoch:02d}.hdf5'
     checkpoint = ModelCheckpoint(filepath, verbose=1,  monitor='val_accuracy', save_weights_only=True, save_best_only=True, mode='max')
-    feature_cla, model = Models(shape).JRD_model()
+    feature_cla, model = Models(shape).RTT_model()
     model_loss_fuse= loss(alpha, beta,batch_size,feature_cla,gamma)
-    model_loss= loss_r(alpha, beta,batch_size) 
-    if arch== 'FuseNet++':
+    if arch== 'Raw-to-task++':
  
         model.compile(   
-            loss = 
-            {
-            "category_output":  model_loss_fuse,
-            "reconstruction_output1": model_loss,
-            "reconstruction_output2": model_loss,
-            "reconstruction_output3": model_loss,
-            "reconstruction_output4": model_loss,
-            "reconstruction_output_fuse": model_loss,
-            },
-            metrics = { "reconstruction_output_fuse":  ['accuracy',  'mse']},
-               
-            optimizer=tf.keras.optimizers.Adam(0.0001, beta_1=0.9, beta_2=0.98,
-                                     epsilon=1e-9)
+            loss =  { "category_output":  model_loss_fuse },
+            metrics = {"reconstruction_output_fuse": 'accuracy' },
+            optimizer=tf.keras.optimizers.Adam(0.0001, beta_1=0.9, beta_2=0.98, epsilon=1e-9)
         )
-    elif arch== 'FuseNet':
-        feature_cla, model = Models(shape).JRD_model()
+    elif arch== 'Raw-to-task':
+        feature_cla, model = Models(shape).RTT_model()
         model_loss_fuse= loss(alpha, beta,batch_size,feature_cla,gamma)
         model_loss= loss_r(alpha, beta,batch_size) 
-        model.compile(   
-            loss = 
-            {
-            "category_output": tf.keras.losses.CategoricalCrossentropy(),
-            "reconstruction_output1": model_loss,
-            "reconstruction_output2": model_loss,
-            "reconstruction_output3": model_loss,
-            "reconstruction_output4": model_loss,
-            "reconstruction_output_fuse": model_loss,
-            },
-            metrics = {"reconstruction_output_fuse": ['accuracy',  'mse']},
-            optimizer=tf.keras.optimizers.Adam(0.0001, beta_1=0.9, beta_2=0.98,
-                                     epsilon=1e-9)
+        model.compile (   
+            loss =  { "category_output": tf.keras.losses.CategoricalCrossentropy() },
+            metrics = { "reconstruction_output_fuse": 'accuracy'  },
+            optimizer=tf.keras.optimizers.Adam(0.0001, beta_1=0.9, beta_2=0.98, epsilon=1e-9)
         )
+
 
     history =model.fit([measure_1, measure_2, measure_3, measure_4], [label,x_train, x_train, x_train, x_train, x_train], epochs=epochs, batch_size=batch_size, shuffle=True,
     validation_split=0.1, callbacks = [plot_losses,checkpoint,LearningRateReducerCb(),reduce_lr])
     
-    plot_generated_images(epochs, model, dir, testmeasure_1, testmeasure_2, testmeasure_3, testmeasure_4, x_test,label_test,True)
     plot_confusionmatrix(epochs, model,dir, testmeasure_1, testmeasure_2, testmeasure_3, testmeasure_4, label_test)
     # plot_roc_curve(model)
 
