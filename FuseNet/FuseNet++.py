@@ -137,8 +137,6 @@ def train(epochs, batch_size, alpha,beta,gamma,arch,dir):
                                      epsilon=1e-9)
                     )
 
-    # loss_file = open('results/losses.txt' , 'w+')
-    # loss_file.close()
     keras.callbacks.Callback()
     reduce_lr = keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=5, min_lr=0.000001, verbose=0, mode='auto') #ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=5, min_lr=0.00001)
     change_lr = LearningRateScheduler(scheduler)
