@@ -41,6 +41,23 @@ from sklearn.preprocessing import label_binarize
 
 global Tmp_ssimlist
 Tmp_ssimlist = 0
+
+
+
+def get_optimizer():
+ 
+    adam = Adam(lr=1E-4, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
+    return adam
+
+def normalize_data(values):
+    from math import sqrt
+
+    scaler = StandardScaler()
+    scaler = scaler.fit(values)
+    normalized = scaler.transform(values)
+
+    return normalized
+
 class VGG_LOSS(object):
 
     def __init__(self, image_shape):
@@ -59,73 +76,6 @@ class VGG_LOSS(object):
         model.trainable = False
     
         return K.mean(K.square(model(y_true) - model(y_pred)))
-
-
-def get_optimizer():
- 
-    adam = Adam(lr=1E-4, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
-    return adam
-
-def normalize_data(values):
-    from math import sqrt
-
-    scaler = StandardScaler()
-    scaler = scaler.fit(values)
-    normalized = scaler.transform(values)
-
-    return normalized
-
-
-def calculateDistance(image1, image2):
-    distance = 0
-    image1 =   np.reshape(image1 ,(128, 128) )
-    image2 =   np.reshape(image2 ,(128, 128) )
-    i,j = np.unravel_index(image1.argmax(), image1.shape)
-    f,h= np.unravel_index(image2.argmax(), image2.shape)
-    x = np.array((i ,j))
-    y = np.array((f, h))
-    dist = np.linalg.norm(np.abs(x-y))
-    from scipy.spatial import distance
-    dist = distance.euclidean(y,x)
-    return dist
-
-def psnr(img1, img2):
-    """
-    Assuming img2 is the ground truth, we take it's PIXEL_MAX
-
-    :param img1: Synthesized image
-    :param img2: Ground Truth
-    :return:
-    """
-    # normalize images between [0, 1]
-    epsilon = 0.00001
-    img2_n = img1 / (img2.max() + epsilon)
-    img1_n = img2 / (img2.max() + epsilon)
-
-    PIXEL_MAX = 1.0
-
-    mse = np.mean((img1_n - img2_n) ** 2)
-    if mse == 0:
-        return 35
-    psnr = 20 * math.log10(PIXEL_MAX / math.sqrt(mse))
-    return psnr
-
-def Dice (im1,im2):
-    im1 = np.asarray(im1).astype(np.bool)
-    im2 = np.asarray(im2).astype(np.bool)
-    # Compute Dice coefficient
-    intersection = np.logical_and(im1, im2)
-
-    return 2. * intersection.sum() / (im1.sum() + im2.sum())
-
-def FuzzyJaccard (im1,im2):
-    A = im1.flatten()
-    B = im2.flatten()
-    minAB= np.minimum(A,B)
-    maxAB= np.maximum(A,B)
-    union= minAB.sum()/maxAB.sum()
-    return union
-
 
 def FuzzyJaccard_distance_loss(y_true, y_pred,  n_channels=1):
  	jac = 0
@@ -588,5 +538,109 @@ def plot_roc_curve(model):
     plt.savefig(dirfile+ '-'+'.png' )
     plt.close("all")
 
+def plot_MCC_2(data_1,data_2,data_3,data_4,data_5,figname):
+    # Creating dataset
+    np.random.seed(10)
+    
+    data = [data_1, data_2, data_3, data_4,data_5]
+    
+    fig = plt.figure(figsize =(10, 7))
+    ax = fig.add_subplot(111)
+    
+    # Creating axes instance
+    bp = ax.boxplot(data, patch_artist = True,
+                    notch ='True', vert = 1)
+    
+    colors = ['#0000FF', '#00FF00','#FFFF00', '#FF00FF','#FFF0F0']
 
+    for patch, color in zip(bp['boxes'], colors):
+        patch.set_facecolor(color)
+    
+    # changing color and linewidth of
+    # whiskers
+    for whisker in bp['whiskers']:
+        whisker.set(color ='#8B008B',
+                    linewidth = 1.5,
+                    linestyle =":")
+    
+    # changing color and linewidth of
+    # caps
+    for cap in bp['caps']:
+        cap.set(color ='#8B008B',
+                linewidth = 2)
+    
+    # changing color and linewidth of
+    # medians
+    for median in bp['medians']:
+        median.set(color ='red',
+                linewidth = 3)
+    
+    # changing style of fliers
+    for flier in bp['fliers']:
+        flier.set(marker ='D',
+                color ='#e7298a',
+                alpha = 1)
+        
+    # x-axis labels
+    ax.set_xticklabels(['Raw-to-Task', 'Rec&Diag-Net',
+                        'FuseNet_L{CE}', 'Cancat_all','One_freq'])
+    
+    # Adding title
+    # plt.title("Customized box plot")
+    # Removing top axes and right axes
+    # ticks
+    ax.get_xaxis().tick_bottom()
+    ax.get_yaxis().tick_left()
+    plt.savefig("testcase_mmc/"+ figname +".png", bbox_inches='tight')
+    return 0
+
+def calculateDistance(image1, image2):
+    distance = 0
+    image1 =   np.reshape(image1 ,(128, 128) )
+    image2 =   np.reshape(image2 ,(128, 128) )
+    i,j = np.unravel_index(image1.argmax(), image1.shape)
+    f,h= np.unravel_index(image2.argmax(), image2.shape)
+    x = np.array((i ,j))
+    y = np.array((f, h))
+    dist = np.linalg.norm(np.abs(x-y))
+    from scipy.spatial import distance
+    dist = distance.euclidean(y,x)
+    return dist
+
+def psnr(img1, img2):
+    """
+    Assuming img2 is the ground truth, we take it's PIXEL_MAX
+
+    :param img1: Synthesized image
+    :param img2: Ground Truth
+    :return:
+    """
+    # normalize images between [0, 1]
+    epsilon = 0.00001
+    img2_n = img1 / (img2.max() + epsilon)
+    img1_n = img2 / (img2.max() + epsilon)
+
+    PIXEL_MAX = 1.0
+
+    mse = np.mean((img1_n - img2_n) ** 2)
+    if mse == 0:
+        return 35
+    psnr = 20 * math.log10(PIXEL_MAX / math.sqrt(mse))
+    return psnr
+
+def Dice (im1,im2):
+    im1 = np.asarray(im1).astype(np.bool)
+    im2 = np.asarray(im2).astype(np.bool)
+    # Compute Dice coefficient
+    intersection = np.logical_and(im1, im2)
+
+    return 2. * intersection.sum() / (im1.sum() + im2.sum())
+
+def FuzzyJaccard (im1,im2):
+    A = im1.flatten()
+    B = im2.flatten()
+    minAB= np.minimum(A,B)
+    maxAB= np.maximum(A,B)
+    union= minAB.sum()/maxAB.sum()
+    return union
 
