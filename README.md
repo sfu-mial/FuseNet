@@ -48,7 +48,7 @@ cd FuseNet
 python3 FuseNet++.py --epochs 10 --outputfolder ../myoutput
 ```
 This will train the network and save output in `myoutput`.
-Examples of outputs are presented in [Images](FuseNet/Figures) 
+Examples of outputs are presented in [Figures](FuseNet/Figures) 
 <!--![images/reconst](FuseNet/Images/test_generated_image-19.png?=100x100)-->
 
 
