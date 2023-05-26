@@ -69,7 +69,7 @@ def initializer(name=None,logs={}):
         parser.add_argument('--epochs', type=int, nargs='?', help='Int, >0, Epochs, default 25')
         parser.add_argument('--batchsize', type=int, nargs='?', help='Int, >0, batchsize, default 16')
         parser.add_argument('--outputfolder', type=str, nargs='?', help='Output folder')
-        parser.add_argument('--mode', type=str, nargs='?', help='train [def], evaluate, resume')
+        parser.add_argument('--mode', type=str, nargs='?', help='train [def], test, resume')
         parser.add_argument('--arch', type=str, nargs='?', help='Raw-to-task++ [def], Raw-to-task')
         parser.add_argument('--datasetdirectory', type=str, nargs='?', help='Path where tif images are stored')
         parser.add_argument('--lr', type=float, nargs='?', help='Float, >0, Learning Rate, default 0.0001')
@@ -141,8 +141,6 @@ def train(epochs, batch_size, alpha,beta,gamma,arch,dir):
     Y_pred = model.predict([testmeasure_1, testmeasure_2, testmeasure_3, testmeasure_4])
     y_pred = np.argmax(Y_pred, axis=1)
     y_testlabel= np.argmax(label_test,1) 
-    print(y_testlabel.shape)
-    print(y_pred.shape)
     plot_confusionmatrix(epochs,dir, y_pred,y_testlabel)
     # plot_roc_curve(model)
 
@@ -155,12 +153,17 @@ if __name__ == "__main__":
     beta = conf['beta']
     gamma = conf['gamma']
     epochs= conf['epochs'] 
+    mode= conf['mode'] 
     logging.captureWarnings(True)
-    print(arch)
     dataset_dir = conf['datasetdirectory']
     outputfolder=  conf['outputfolder']
-    print (dataset_dir)
-    measure_1,measure_2,measure_3,measure_4, x_train, label, testmeasure_1,testmeasure_2,testmeasure_3,testmeasure_4,x_test ,label_test=load_data(dataset_dir)
-    print("data loaded")
-    train(epochs,batchsize, alpha,beta,gamma,arch,outputfolder )
+    # print (dataset_dir)
+    if mode == 'train':
+        measure_1,measure_2,measure_3,measure_4, x_train, label, testmeasure_1,testmeasure_2,testmeasure_3,testmeasure_4,x_test ,label_test=load_data(dataset_dir)
+        train(epochs,batchsize, alpha,beta,gamma,arch,outputfolder)
+    elif mode == 'test':
+        measure_1,measure_2,measure_3,measure_4, x_train, label, testmeasure_1,testmeasure_2,testmeasure_3,testmeasure_4,x_test ,label_test=load_data(dataset_dir)
+        test(epochs,batchsize, alpha,beta,gamma,arch,outputfolder)
+
+
 
