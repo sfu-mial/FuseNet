@@ -1,14 +1,7 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Dec 06 12:15:16 2017
-
-@author: Haneneby
-"""
 
 from numpy import genfromtxt
 import numpy as np
-
+from Data_utils import *
 import os
 import glob
 import csv
@@ -26,123 +19,18 @@ logging.basicConfig(format=FORMAT)
 lgr = logging.getLogger('global')
 lgr.setLevel(logging.INFO)
 
-def readcomplex(strng):
-	strng = strng.replace(" ", '')
-	strng = strng.replace("i", 'j')
-	c = 0
-	try:
-		c = complex(strng)
-	except ValueError as e:
-		print("Exception on input")
-		print(strng)
-	return c
-def norm(image):
-    norm_image = cv2.normalize(image, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
-    return norm_image
-
-def sortfiles(listfiles):
-    return [ x for (_,x) in sorted( ( (int(stri[stri.find('-')+1:stri.find('.')]),stri) for stri in listfiles )
-
-                                   ) ]
-
-def myfunction( x,  noise_factor = 5):
-    #print (x.shape)
-    noise =  noise_factor * np.random.normal(loc=0.0, scale=10, size=x.shape) #+np.random.randint(1000,4000)
-    #print (noise.shape)
-
-    return x +noise
-
-def copyandunzip (filename):  
-    
-#    dir1=  '/cs/ghassan2/students_less/hbenyedd/data/'
-    dir1= '/local-scratch/Hanene/Data/'
-    copy2(dir1+ filename+'.zip', '/dev/shm/hanenby')
-    with zipfile.ZipFile("/dev/shm/hanenby/"+ filename +'.zip',"r") as zip_ref:
-        zip_ref.extractall("/dev/shm/hanenby/")
-    print (os.path.exists('/dev/shm/hanenby/'+filename))            
-    return
-
-def loadmeasure(path_to_parent):
-##    measlist = sortfiles(os.listdir(path_to_parent))
-##    my_data = (np.vectorize(lambda t:readcomplex(t))(genfromtxt(os.path.join(path_to_parent, csv_file), delimiter=',',dtype='str')) for csv_file in measlist)
-#    my_data = np.vectorize(lambda t:readcomplex(t)) (genfromtxt(path_to_parent+'/'+'measures.csv', delimiter=',',dtype='str'))
-#    #print my_data.shape
-#    my_data = np.absolute(my_data)
-#    measure =my_data.transpose()
-    measlist = sortfiles(os.listdir(path_to_parent))
-    my_data = (np.vectorize(lambda t:readcomplex(t))(genfromtxt(os.path.join(path_to_parent, csv_file), delimiter=',',dtype='str')) for csv_file in measlist)
-    #my_data= np.vectorize(np.genfromtxt(path3+'/' + im2, converters={0: lambda x: x.replace('i','j')},delimiter=',', dtype=str)for im2 in measlist)
-    measure = np.absolute(list(my_data))
-    #measure =measure.transpose()
-
-    #measure = np.absolute(list(my_data))
-    #measure =measure.transpose()
-    print (measure.shape)
-    return  measure
-def loadimage(path):
-    imlist = removedotfile(path)
-    immatrix= array([(np.around(genfromtxt(os.path.join(path, im), delimiter=',',dtype='float'),decimals=4))#.flatten()
-                   for im in imlist],'f') #'%.2f' % elem for elem in myList ]
-    print (immatrix.shape)
-    return immatrix #[(i, immatrix[i, :, :].copy()) for i in range(immatrix.shape[0]) if immatrix[i, :, :].max() >= 0.09]
-def postprocess(x,y):
-    z=[]
-    t=[]
-    j=0
-    for i in range(x.shape[0]):
-        if (x[i, :, :].max() >= 0.09) or abs((x[i, :, :].max()-(x[i, :, :].min()))<0.0001):
-            l = len(z)
-            #print('appending')
-            z.append(x[i, :, :])
-            L = len(z)
-            assert(l < L)
-            t.append(y[i, :])
-            j+=1
-    zz = np.array(z)
-    tt = np.array(t)
-    print (x.shape)
-    print (y.shape)
-    print (zz.shape)
-    print (tt.shape)
-    return zz,tt
-
-def nean_std_data(x):
-    mvec = x.mean(0)
-    stdvec = x.std(axis=0) 
-    return mvec, stdvec#,mvec,stdvec
-def loadrealmeas(path):
-     data = pd.read_csv(path, header=None)
-     values = data.values[:, :]
-     rmeas = np.asmatrix(values, dtype='float64')    
-     return rmeas
-def removedotfile (path):
-    listing = (os.listdir(path))
-    i=0
-    while((listing[i]=='.') or (listing[i]=='..') or (listing[i]=='.DS_Store' )):
-        i=i+1
-    imlist = sortfiles(listing[i:])
-    return imlist
-
-
 
 def load_data():
 
      noise_factor = 5
-     direc= '/local-scratch/Hanene/Data/multi-freq/Data/'#/cs/ghassan2/students_less/hbenyedd/data'
+     direc= '/local-scratch/Hanene/Data/multi-freq/Data/'
      print (direc)
-#TRAINSET
-     #path load GT image
-    #  train_dirc='localization_effect/testset_var_depth'
      train_dirc='sizevsdepth'
 
-     path1 = direc+train_dirc+'/'+'benign/absmat' #benigns
+     path1 = direc+train_dirc+'/'+'benign/absmat' 
      immatrix1= loadimage(path1)
 
-    #  path2 =   direc+train_dirc+'/'+'malignant/absmat'  #path of folder to save images
-    #  immatrix2= loadimage(path2)
-
-
-     immatrix= immatrix1 #np.concatenate((immatrix1,immatrix2), axis=0)
+     immatrix= immatrix1
 
      #path load image label
      path1 = direc+train_dirc+'/'+'benign/label' #path of folder to save images

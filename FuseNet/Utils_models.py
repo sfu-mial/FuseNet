@@ -432,9 +432,9 @@ def plot_generated_images(epoch,generator, dir,generated_image_1 ,generated_imag
     psnr_std=np.std(psnrlist)
     ssim_mean=np.mean(ssimlist)
     ssim_std=np.std(ssimlist)
-    loss_file = open( dir+ '/losses.txt' , 'a')
-    if (val == True):
-        loss_file.write('synthe  epoch%d :  DistanceROI = %s + ~  %s ; psnr_mean = %s + ~  %s ; ssim_mean = %s + ~  %s ; FuzzyJaccard_mean = %s + ~ %s \n' %(epoch, DistanceROI_mean, DistanceROI_std,psnr_mean,psnr_std,ssim_mean, ssim_std, FJ_mean, FJ_std ) )
+    # loss_file = open( dir+ '/losses.txt' , 'a')
+    # if (val == True):
+        # loss_file.write('synthe  epoch%d :  DistanceROI = %s + ~  %s ; psnr_mean = %s + ~  %s ; ssim_mean = %s + ~  %s ; FuzzyJaccard_mean = %s + ~ %s \n' %(epoch, DistanceROI_mean, DistanceROI_std,psnr_mean,psnr_std,ssim_mean, ssim_std, FJ_mean, FJ_std ) )
     if Tmp_ssimlist<ssim_mean:
         generator.save( dir+ '/Checkpoint.h5')
         print('ssim improved from %s to %s, saving model to weight\n' %(Tmp_ssimlist, ssim_mean))
