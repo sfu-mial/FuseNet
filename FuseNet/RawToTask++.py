@@ -3,6 +3,7 @@ from sklearn.preprocessing import StandardScaler
 import os
 from sklearn.preprocessing import label_binarize
 from LoadData import load_data, preprocess
+from LoadTestData import load_data, preprocess
 from Models import *
 from Tools import *
 from Utils_models import *
@@ -143,6 +144,21 @@ def train(epochs, batch_size, alpha,beta,gamma,arch,dir):
     y_testlabel= np.argmax(label_test,1) 
     plot_confusionmatrix(epochs,dir, y_pred,y_testlabel)
     # plot_roc_curve(model)
+def test(testmeasure_1,testmeasure_2,testmeasure_3,testmeasure_4,x_test ,label_test):
+    if arch== 'Raw-to-task++':
+        pathRTT= '/local-scratch/Hanene/DOT_model_2019/new/rnn/MFDL/R_To_T/best_RTT_results_GN_persensor_lr/deep_spa_mse_only.h5'
+        RTT_model= load_model(pathRTT,compile=False)
+        Y_pred = RTT_model.predict([testmeasure_1[1:2,:], testmeasure_2[1:2,:], testmeasure_3[1:2,:],testmeasure_4[1:2,:]])
+
+    elif arch== 'Raw-to-task':
+        pathRTT= '/local-scratch/Hanene/DOT_model_2019/new/rnn/MFDL/R_To_T/results_ce_only_adjusted_fusin_skip0/deep_spa_mse_only.h5'
+        RTTCE_model= load_model(pathRTT,compile=False)
+        Y_pred = RTTCE_model.predict([testmeasure_1[1,:], testmeasure_2[1,:], testmeasure_3[1,:],testmeasure_4[1,:]])
+    y_pred = np.argmax(Y_pred, axis=1)
+    y_true = np.argmax(label_test,1) 
+
+    print ("true vs predicted,", y_true[1:2], y_pred)
+
 
 if __name__ == "__main__":
     conf=initializer()
@@ -162,8 +178,8 @@ if __name__ == "__main__":
         measure_1,measure_2,measure_3,measure_4, x_train, label, testmeasure_1,testmeasure_2,testmeasure_3,testmeasure_4,x_test ,label_test=load_data(dataset_dir)
         train(epochs,batchsize, alpha,beta,gamma,arch,outputfolder)
     elif mode == 'test':
-        measure_1,measure_2,measure_3,measure_4, x_train, label, testmeasure_1,testmeasure_2,testmeasure_3,testmeasure_4,x_test ,label_test=load_data(dataset_dir)
-        test(epochs,batchsize, alpha,beta,gamma,arch,outputfolder)
+        testmeasure_1,testmeasure_2,testmeasure_3,testmeasure_4,x_test ,label_test=load_data(dataset_dir)
+        test(testmeasure_1,testmeasure_2,testmeasure_3,testmeasure_4,x_test ,label_test)
 
 
 

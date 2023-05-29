@@ -148,7 +148,7 @@ def load_data(direc):
 
 
 def preprocess(X_train_690,X_train_750,X_train_800,X_train_850,y_train,Y_label,X_test_690,X_test_750,X_test_800,X_test_850,y_test,Y_testlabel):
-     print ('here')
+     # print ('here')
      x_train_1= X_train_690#+ np.random.normal( measure_1.mean()/3, measure_1.mean()/2, 256)
      x_train_2= X_train_750#+ np.random.normal( measure_2.mean()/3, measure_2.mean()/2, 256)
      x_train_3= X_train_800#+ np.random.normal( measure_3.mean()/3, measure_3.mean()/2, 256)

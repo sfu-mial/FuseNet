@@ -188,10 +188,10 @@ def Fusion_block(vec1, vec2, vec3,vec4):
     one_tens1= K.tf.ones ((K.tf.shape(o1)[0],1),dtype='float32')
     one_tens2= K.tf.ones ((K.tf.shape(o2)[0],1),dtype='float32')
     one_tens3= K.tf.ones ((K.tf.shape(o3)[0],1),dtype='float32')
-    print("dists_ones {.shape}".format(one_tens1))
+    # print("dists_ones {.shape}".format(one_tens1))
 
     o1= Concatenate(axis=1)([o1,  one_tens1])
-    print("dists_concat {.shape}".format(o1))
+    # print("dists_concat {.shape}".format(o1))
 
     o2= Concatenate(axis=1)([o2, one_tens2])
     o3= Concatenate(axis=1)([o3, one_tens3])
@@ -201,37 +201,37 @@ def Fusion_block(vec1, vec2, vec3,vec4):
     o1 =tf.expand_dims(o1, 2)
 
     o2 =tf.expand_dims(o2, 1)
-    print("distso2{.shape}".format(o2))
+    # print("distso2{.shape}".format(o2))
 
     o12= tf.keras.layers.Multiply()([o1, o2])
-    print("distso12{.shape}".format(o12))
+    # print("distso12{.shape}".format(o12))
 
     o12= tf.reshape(o12,[K.tf.shape(o1)[0],(dim+1)*(dim+1)])
-    print("distso12{.shape}".format(o12))
+    # print("distso12{.shape}".format(o12))
 
     o12 =tf.expand_dims(o12, 2)
-    print("distso12{.shape}".format(o12))
+    # print("distso12{.shape}".format(o12))
 
     o3 =tf.expand_dims(o3, 1)
-    print("distso3{.shape}".format(o3))
+    # print("distso3{.shape}".format(o3))
 
     o123 = tf.keras.layers.Multiply()([o12, o3])
 
-    print("distsoo123{.shape}".format(o123))
+    # print("distsoo123{.shape}".format(o123))
 
     o123= tf.reshape(o123,[K.tf.shape(o1)[0],(dim+1)*(dim+1)*(dim+1)])
-    print("distsoo123{.shape}".format(o123))
+    # print("distsoo123{.shape}".format(o123))
 
     o123 =tf.expand_dims(o123, 2)
-    print("distso123{.shape}".format(o123))
+    # print("distso123{.shape}".format(o123))
     o4 =tf.expand_dims(o4, 1)
-    print("dists_o4 {.shape}".format(o4))
+    # print("dists_o4 {.shape}".format(o4))
     o1234 = tf.keras.layers.Multiply()([o123, o4])
 
-    print("distsoo1234{.shape}".format(o1234))
+    # print("distsoo1234{.shape}".format(o1234))
 
     o1234= tf.reshape(o1234,[K.tf.shape(o1)[0],(dim+1)*(dim+1)*(dim+1)*(dim+1)])
-    print("distsoo1234{.shape}".format(o1234))
+    # print("distsoo1234{.shape}".format(o1234))
 
     out_fused = Dropout(0.5)(o1234)
     out_fused = Dense(128, activation = 'relu')(out_fused)

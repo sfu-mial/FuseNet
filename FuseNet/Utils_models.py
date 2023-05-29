@@ -121,10 +121,10 @@ def OrthogonalProjectionLoss(features,labels, batch_size, gamma=0.5):
     dot_prod =K.dot(features, K.transpose (features))
     print("dot_prod {.shape}".format(dot_prod))
     # dot_prod = K.tf.expand_dims(dot_prod,2) 
-    pos_pairs_mean = K.sum(tf.linalg.matmul (mask_pos , dot_prod)) / K.sum (mask_pos + 1e-6)
+    pos_pairs_mean =K.abs( K.sum(tf.linalg.matmul (mask_pos , dot_prod)) / K.sum (mask_pos + 1e-6))
     print("pos_pairs_mean {.shape}".format(pos_pairs_mean))
 
-    neg_pairs_mean = K.sum(tf.matmul(mask_neg , dot_prod))/ K.sum(mask_neg + 1e-6)
+    neg_pairs_mean =K.abs( K.sum(tf.matmul(mask_neg , dot_prod))/ K.sum(mask_neg + 1e-6))
     print("neg_pairs_mean {.shape}".format(neg_pairs_mean))
     loss = (1.0 - pos_pairs_mean) + gamma * neg_pairs_mean
     print("loss {.shape}".format(loss))
@@ -314,12 +314,12 @@ def custom_loss(y_true, y_pred, alpha, Beta,batch_size,feature, gamma):
 
     # loss+= Beta*FuzzyJaccard_distance_loss(y_true, y_pred)#  Beta* was 0.4, 0.3
     # loss +=alpha* dst_transform(y_true, y_pred)
-    weights= np.array([0.3,.5,.5])
+    weights= np.array([0.5,.5,.5])
     ce =losses.categorical_crossentropy(y_true, y_pred)
     loss= weighted_categorical_crossentropy(y_true, y_pred,weights)
     # loss=categorical_focal_loss(y_true, y_pred, alpha=[[.25, .25, .25]], gamma=2.)
-    loss +=0.3*OrthogonalProjectionLoss(feature ,y_true, batch_size, gamma=0.7) 
-    return  loss/2
+    loss +=0.5*OrthogonalProjectionLoss(feature ,y_true, batch_size, gamma=0.5) 
+    return  1+loss/2
 
 def loss_r(alpha, Beta,batch_size):
     def custom_loss_func_r(y_true, y_pred):
