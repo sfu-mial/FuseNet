@@ -68,7 +68,7 @@ mkdir myoutput
 cd FuseNet
 python3 FuseNet++.py  --input testdatadir --outputfolder ../myoutput  --mode test
 ```
-TThe results will be saved output in `myoutput`.
+The results will be saved output in `myoutput`.
 ### Questions?
 <a name="faq"></a>
 Please create a [new issue](https://github.com/haneneby/FuseNet/issues/new/choose)  detailing concisely, yet complete what issue you encountered, in a reproducible way.
