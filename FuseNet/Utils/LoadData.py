@@ -4,13 +4,13 @@
 """
 from numpy import genfromtxt
 import numpy as np
-from Data_utils import *
+from Utils.Data_utils import *
 import os
 import glob
 import csv
 import pandas as pd
 from numpy import *
-from Utils_models import normalize_data
+from Utils.Utils_models import normalize_data
 from sklearn.utils import shuffle
 from sklearn.model_selection import train_test_split
 #from pathlib import Path

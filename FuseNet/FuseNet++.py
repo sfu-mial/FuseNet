@@ -2,10 +2,13 @@ import argparse
 from sklearn.preprocessing import StandardScaler
 import os
 from sklearn.preprocessing import label_binarize
-from LoadData import load_data, preprocess
+from Utils.LoadData import load_data, preprocess
+from Utils.LoadTestData import load_data_t, preprocess_t
 from Models import *
-from Tools import *
-from Utils_models import *
+from Utils.Tools import *
+from Utils.Utils_models import *
+from Utils.losses import *
+from Utils.visualize import *
 import tensorflow as tf
 os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
 import itertools
@@ -162,9 +165,28 @@ def train(epochs, batch_size, alpha,beta,gamma,arch,dir):
     y_testlabel= np.argmax(label_test,1) 
     # print(y_testlabel)
     # print(y_pred)
-    plot_generated_images(epochs,model, dir, Im_pred_1,Im_pred_2, Im_pred_3,Im_pred_4, Im_pred_f, x_test,label_test,True)
+    plot_generated_images(epochs, dir, Im_pred_1,Im_pred_2, Im_pred_3,Im_pred_4, Im_pred_f, x_test,label_test,True)
     plot_confusionmatrix(epochs,dir, y_pred,y_testlabel)
     # plot_roc_curve(model)
+
+def test(testmeasure_1,testmeasure_2,testmeasure_3,testmeasure_4,x_test ,label_test, dir):
+    if arch== 'FuseNet++':
+        path= '/local-scratch/Hanene/DOT_model_2019/new/rnn/MFDL/new_fusion_orth/nor_orth_diag_02DT_025FJ_skip_0_FUSE_RALL_DIAg_4-6layers_wce/deep_spa_mse_only.h5'
+        RTRD_model= load_model(path,compile=False)#, custom_objects={'custom_loss_func': loss})
+        Y_pred, Im_pred_1,Im_pred_2, Im_pred_3,Im_pred_4, Im_pred_f = RTRD_model.predict([testmeasure_1[1:2,:], testmeasure_2[1:2,:], testmeasure_3[1:2,:],testmeasure_4[1:2,:]])
+
+
+    elif arch== 'FuseNet':
+        path= '/local-scratch/Hanene/DOT_model_2019/new/rnn/MFDL/new_fusion_orth/results_fuse_only/deep_spa_mse_only.h5'
+        RTRD_notorth_model= load_model(path,compile=False)#, custom_objects={'custom_loss_func': loss})
+        Y_pred, Im_pred_1,Im_pred_2, Im_pred_3,Im_pred_4, Im_pred_f = RTRD_notorth_model.predict([testmeasure_1[1:2,:], testmeasure_2[1:2,:], testmeasure_3[1:2,:],testmeasure_4[1:2,:]])
+    y_pred = np.argmax(Y_pred, axis=1)
+    y_true = np.argmax(label_test,1) 
+    print ("true vs predicted,", y_true[1:2], y_pred)
+    plot_generated_images(epochs, dir, Im_pred_1,Im_pred_2, Im_pred_3,Im_pred_4, Im_pred_f, x_test[1:2,:],label_test,False)
+
+
+
 
 if __name__ == "__main__":
     conf=initializer()
@@ -177,10 +199,16 @@ if __name__ == "__main__":
     epochs= conf['epochs'] 
     logging.captureWarnings(True)
     print(arch)
+    mode= conf['mode'] 
     dataset_dir = conf['datasetdirectory']
     outputfolder=  conf['outputfolder']
     print (dataset_dir)
-    measure_1,measure_2,measure_3,measure_4, x_train, label, testmeasure_1,testmeasure_2,testmeasure_3,testmeasure_4,x_test ,label_test=load_data(dataset_dir)
     print("data loaded")
-    train(epochs,batchsize, alpha,beta,gamma,arch,outputfolder )
+    if mode == 'train':
+        measure_1,measure_2,measure_3,measure_4, x_train, label, testmeasure_1,testmeasure_2,testmeasure_3,testmeasure_4,x_test ,label_test=load_data(dataset_dir)
+        train(epochs,batchsize, alpha,beta,gamma,arch,outputfolder)
+    elif mode == 'test':
+        testmeasure_1, testmeasure_2, testmeasure_3, testmeasure_4, x_test ,label_test=load_data_t(dataset_dir)
+        test(testmeasure_1,testmeasure_2,testmeasure_3,testmeasure_4,x_test ,label_test,outputfolder)
+
 

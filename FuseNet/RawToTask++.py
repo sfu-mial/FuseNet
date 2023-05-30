@@ -2,11 +2,13 @@ import argparse
 from sklearn.preprocessing import StandardScaler
 import os
 from sklearn.preprocessing import label_binarize
-from LoadData import load_data, preprocess
-from LoadTestData import load_data, preprocess
+from Utils.LoadData import load_data, preprocess
+from Utils.LoadTestData import load_data_t, preprocess_t
 from Models import *
-from Tools import *
-from Utils_models import *
+from Utils.Tools import *
+from Utils.Utils_models import *
+from Utils.losses import *
+from Utils.visualize import *
 import tensorflow as tf
 os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
 import itertools
@@ -153,7 +155,7 @@ def test(testmeasure_1,testmeasure_2,testmeasure_3,testmeasure_4,x_test ,label_t
     elif arch== 'Raw-to-task':
         pathRTT= '/local-scratch/Hanene/DOT_model_2019/new/rnn/MFDL/R_To_T/results_ce_only_adjusted_fusin_skip0/deep_spa_mse_only.h5'
         RTTCE_model= load_model(pathRTT,compile=False)
-        Y_pred = RTTCE_model.predict([testmeasure_1[1,:], testmeasure_2[1,:], testmeasure_3[1,:],testmeasure_4[1,:]])
+        Y_pred = RTTCE_model.predict([testmeasure_1[1:2,:], testmeasure_2[1:2,:], testmeasure_3[1:2,:],testmeasure_4[1:2,:]])
     y_pred = np.argmax(Y_pred, axis=1)
     y_true = np.argmax(label_test,1) 
 
@@ -178,7 +180,7 @@ if __name__ == "__main__":
         measure_1,measure_2,measure_3,measure_4, x_train, label, testmeasure_1,testmeasure_2,testmeasure_3,testmeasure_4,x_test ,label_test=load_data(dataset_dir)
         train(epochs,batchsize, alpha,beta,gamma,arch,outputfolder)
     elif mode == 'test':
-        testmeasure_1,testmeasure_2,testmeasure_3,testmeasure_4,x_test ,label_test=load_data(dataset_dir)
+        testmeasure_1,testmeasure_2,testmeasure_3,testmeasure_4,x_test ,label_test=load_data_t(dataset_dir)
         test(testmeasure_1,testmeasure_2,testmeasure_3,testmeasure_4,x_test ,label_test)
 
 
