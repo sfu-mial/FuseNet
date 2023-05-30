@@ -110,9 +110,9 @@ def initializer(name=None,logs={}):
 
 
 def train(epochs, batch_size, alpha,beta,gamma,arch,dir):
-    alpha = K.variable(alpha)#(0.1)
-    beta = K.variable(beta)#(0.02)
-    gamma = K.variable(gamma)#(0.02)
+    alpha = K.variable(alpha)
+    beta = K.variable(beta)
+    gamma = K.variable(gamma)
     shape = (256,)
     keras.callbacks.Callback()
     reduce_lr = keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=5, min_lr=0.000001, verbose=0, mode='auto') #ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=5, min_lr=0.00001)
