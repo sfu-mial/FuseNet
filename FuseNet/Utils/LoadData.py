@@ -31,7 +31,7 @@ def load_data(direc):
      print (direc)
     #TRAINSET
 
-     train_dirc2='trainsetsmalloneblob'
+     train_dirc2='trainset'
      path1 = direc+train_dirc2+'/'+'benign/absmat' 
      immatrix3= loadimage(path1)
 
@@ -40,7 +40,6 @@ def load_data(direc):
      immatrix= 100*np.concatenate((immatrix3,immatrix4), axis=0)
 
 
-     train_dirc2='trainsetsmalloneblob'
      path1 = direc+train_dirc2+'/'+'benign/label' 
      label3= loadmeasure(path1)
 
@@ -75,7 +74,6 @@ def load_data(direc):
      measure_800= np.concatenate((measure3,measure4), axis=0)   
 
 
-     train_dirc2='trainsetsmalloneblob'
      path3 =  direc+train_dirc2+'/'+'benign/850/csv'  
      measure3=loadmeasure(path3)
 
