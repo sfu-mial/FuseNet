@@ -171,7 +171,8 @@ def train(epochs, batch_size, alpha,beta,gamma,arch,dir):
 
 def test(testmeasure_1,testmeasure_2,testmeasure_3,testmeasure_4,x_test ,label_test, dir):
     if arch== 'FuseNet++':
-        path= '/local-scratch/Hanene/DOT_model_2019/new/rnn/MFDL/new_fusion_orth/nor_orth_diag_02DT_025FJ_skip_0_FUSE_RALL_DIAg_4-6layers_wce/deep_spa_mse_only.h5'
+        path=  '/local-scratch/Hanene/DOT_model_2019/new/rnn/MFDL/new_fusion_orth/Best_results_GNnoise_mean_Std_fuse_orth/deep_spa_mse_only.h5'
+'
         RTRD_model= load_model(path,compile=False)#, custom_objects={'custom_loss_func': loss})
         Y_pred, Im_pred_1,Im_pred_2, Im_pred_3,Im_pred_4, Im_pred_f = RTRD_model.predict([testmeasure_1[1:2,:], testmeasure_2[1:2,:], testmeasure_3[1:2,:],testmeasure_4[1:2,:]])
 
