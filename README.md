@@ -68,6 +68,35 @@ mkdir myoutput
 cd FuseNet
 python3 FuseNet++.py  --input testdatadir --outputfolder ../myoutput  --mode test
 ```
+
+This will show something like:
+```bash
+[FuseNet++.py:100 -          initializer() ] Writing output in /dev/shm/FuseNet/FuseNet/../myoutput
+[FuseNet++.py:101 -          initializer() ] Logging directory /dev/shm/FuseNet/FuseNet/../myoutput
+[FuseNet++.py:104 -          initializer() ] CONF::		 epochs -> 10
+[FuseNet++.py:104 -          initializer() ] CONF::		 loss -> mse
+[FuseNet++.py:104 -          initializer() ] CONF::		 lr -> 0.0001
+[FuseNet++.py:104 -          initializer() ] CONF::		 seed -> 2
+[FuseNet++.py:104 -          initializer() ] CONF::		 device -> gpu
+[FuseNet++.py:104 -          initializer() ] CONF::		 arch -> FuseNet++
+[FuseNet++.py:104 -          initializer() ] CONF::		 batchsize -> 16
+[FuseNet++.py:104 -          initializer() ] CONF::		 alpha -> 0.2
+[FuseNet++.py:104 -          initializer() ] CONF::		 beta -> 0.25
+[FuseNet++.py:104 -          initializer() ] CONF::		 gamma -> 0.5
+[FuseNet++.py:104 -          initializer() ] CONF::		 checkpoint -> None
+[FuseNet++.py:104 -          initializer() ] CONF::		 datasetdirectory -> ./data/data_samples/
+[FuseNet++.py:104 -          initializer() ] CONF::		 outputfolder -> ../myoutput
+[FuseNet++.py:104 -          initializer() ] CONF::		 checkpointdirectory -> .
+[FuseNet++.py:104 -          initializer() ] CONF::		 mode -> train
+[FuseNet++.py:104 -          initializer() ] CONF::		 outputdirectory -> /dev/shm/FuseNet/FuseNet/../myoutput
+[FuseNet++.py:104 -          initializer() ] CONF::		 logdir -> /dev/shm/FuseNet/FuseNet/../myoutput
+...
+Train on 1939 samples, validate on 216 samples
+Epoch 1/10
+  16/1939 [..............................] - ETA: 34:23 - loss: 19.4238
+```
+
+
 The results will be saved output in `myoutput`.
 ### Questions?
 <a name="faq"></a>
