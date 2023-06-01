@@ -14,6 +14,7 @@ from keras.layers import *
 from keras.layers import GlobalAveragePooling2D, Reshape, multiply, Permute
 from keras import backend as K
 from keras.utils.vis_utils import plot_model
+import tensorflow as tf
 
 
 def squeeze_excite_channel_wise_block(input, ratio=16):
