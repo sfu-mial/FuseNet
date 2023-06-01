@@ -1,7 +1,4 @@
 
-"""
-@author: Haneneby
-"""
 from numpy import genfromtxt
 import numpy as np
 from Utils.Data_utils import *
@@ -13,7 +10,6 @@ from numpy import *
 from Utils.Utils_models import normalize_data
 from sklearn.utils import shuffle
 from sklearn.model_selection import train_test_split
-#from pathlib import Path
 import shutil
 from shutil import rmtree,copyfile,copy2
 import zipfile
@@ -103,17 +99,17 @@ def preprocess_t(X_test_690,X_test_750,X_test_800,X_test_850,y_test,Y_testlabel)
      y_testima= y_test
 
      # normalize data
-     x_test_1 = normalize_data(X_test_690) #here
+     x_test_1 = normalize_data(X_test_690) 
 
-     x_test_2= normalize_data(X_test_750) #here
+     x_test_2= normalize_data(X_test_750) 
 
-     x_test_3 = normalize_data(X_test_800) #here
+     x_test_3 = normalize_data(X_test_800) 
 
-     x_test_4= normalize_data(X_test_850) #here
+     x_test_4= normalize_data(X_test_850) 
 
      y_test = np.reshape(y_testima, (len(y_testima), 128, 128,1))  #
 
-     y_testlabel=label_binarize(Y_testlabel, classes=[0, 1, 2])# #np_utils.to_categorical(y_test, 3)
+     y_testlabel=label_binarize(Y_testlabel, classes=[0, 1, 2])
 
 
 

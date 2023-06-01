@@ -181,9 +181,9 @@ def Fusion_block(vec1, vec2, vec3,vec4):
 
     ### Fusion
 
-    print("dists {.shape}".format(o1))
-    print("dists {.shape}".format(o2))
-    print("dists {.shape}".format(o3))
+    # print("dists {.shape}".format(o1))
+    # print("dists {.shape}".format(o2))
+    # print("dists {.shape}".format(o3))
 
     one_tens1= K.tf.ones ((K.tf.shape(o1)[0],1),dtype='float32')
     one_tens2= K.tf.ones ((K.tf.shape(o2)[0],1),dtype='float32')
@@ -237,11 +237,11 @@ def Fusion_block(vec1, vec2, vec3,vec4):
     out_fused = Dense(128, activation = 'relu')(out_fused)
     out_fused =  Dropout(ratio)(out_fused)
     if skip:
-         print("gated attention_concat_only no kronecker fusion")
+        #  print("gated attention_concat_only no kronecker fusion")
          out = concat
     else:
          out = out_fused
-         print("********gated attention with kroneckerfusion*********")
+        #  print("********gated attention with kroneckerfusion*********")
 
     out = Dense(128, activation = 'relu')(out)
     out =  Dropout(ratio, name="fusion")(out)

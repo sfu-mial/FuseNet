@@ -146,42 +146,32 @@ def load_data(direc):
 
 
 def preprocess(X_train_690,X_train_750,X_train_800,X_train_850,y_train,Y_label,X_test_690,X_test_750,X_test_800,X_test_850,y_test,Y_testlabel):
-     # print ('here')
-     x_train_1= X_train_690#+ np.random.normal( measure_1.mean()/3, measure_1.mean()/2, 256)
-     x_train_2= X_train_750#+ np.random.normal( measure_2.mean()/3, measure_2.mean()/2, 256)
-     x_train_3= X_train_800#+ np.random.normal( measure_3.mean()/3, measure_3.mean()/2, 256)
-     x_train_4= X_train_850#+ np.random.normal( measure_4.mean()/3, measure_4.mean()/2, 256)
+     
 
-     # y_train= immatrix
-     x_test_2= X_test_690#+ np.random.normal( testmeasure_2.mean()/3, testmeasure_2.mean()/2, 256)
-     x_test_1= X_test_750#+ np.random.normal( testmeasure_1.mean()/3, testmeasure_1.mean()/2, 256)
-     x_test_3= X_test_800#+ np.random.normal( testmeasure_3.mean()/3, testmeasure_3.mean()/2, 256)
-     x_test_4= X_test_850#+ np.random.normal( testmeasure_4.mean()/3, testmeasure_4.mean()/2, 256)
-     # x_train= measure_750
      y_train_label= Y_label
      y_trainima= y_train
      y_testlabel=Y_testlabel
      y_testima= y_test
 
      # normalize data
-     x_train_1= normalize_data (X_train_690) #here
-     x_test_1 = normalize_data(X_test_690) #here
+     x_train_1= normalize_data (X_train_690) 
+     x_test_1 = normalize_data(X_test_690) 
 
-     x_train_2= normalize_data (X_train_750) #here
-     x_test_2= normalize_data(X_test_750) #here
+     x_train_2= normalize_data (X_train_750) 
+     x_test_2= normalize_data(X_test_750)
 
-     x_train_3= normalize_data (X_train_800) #here
-     x_test_3 = normalize_data(X_test_800) #here
+     x_train_3= normalize_data (X_train_800) 
+     x_test_3 = normalize_data(X_test_800) 
 
-     x_train_4= normalize_data (X_train_850) #here
-     x_test_4= normalize_data(X_test_850) #here
+     x_train_4= normalize_data (X_train_850) 
+     x_test_4= normalize_data(X_test_850) 
 
-     y_train = np.reshape(y_trainima, (len(y_trainima), 128, 128,1))  #
-     y_test = np.reshape(y_testima, (len(y_testima), 128, 128,1))  #
+     y_train = np.reshape(y_trainima, (len(y_trainima), 128, 128,1))  
+     y_test = np.reshape(y_testima, (len(y_testima), 128, 128,1))  
 
-     y_label= label_binarize(Y_label, classes=[0, 1, 2])#np_utils.to_categorical(y_train, 3)
+     y_label= label_binarize(Y_label, classes=[0, 1, 2])
 
-     y_testlabel=label_binarize(Y_testlabel, classes=[0, 1, 2])# #np_utils.to_categorical(y_test, 3)
+     y_testlabel=label_binarize(Y_testlabel, classes=[0, 1, 2])
 
 
 

@@ -43,14 +43,14 @@ def loadmeasure(path_to_parent):
     measlist = sortfiles(os.listdir(path_to_parent))
     my_data = (np.vectorize(lambda t:readcomplex(t))(genfromtxt(os.path.join(path_to_parent, csv_file), delimiter=',',dtype='str')) for csv_file in measlist)
     measure = np.absolute(list(my_data))
-    print (measure.shape)
+    # print (measure.shape)
     return  measure
 
 def loadimage(path):
     imlist = removedotfile(path)
     immatrix= array([(np.around(genfromtxt(os.path.join(path, im), delimiter=',',dtype='float'),decimals=4))#.flatten()
                    for im in imlist],'f') 
-    print (immatrix.shape)
+    # print (immatrix.shape)
     return immatrix 
 
 def nean_std_data(x):

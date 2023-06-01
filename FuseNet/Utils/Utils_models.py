@@ -35,7 +35,6 @@ import timeit
 from sklearn.metrics import jaccard_score, classification_report, confusion_matrix
 from  skimage.metrics import structural_similarity as ssim
 import skimage
-print(skimage.__version__)
 from keras import losses
 from sklearn.preprocessing import label_binarize
 

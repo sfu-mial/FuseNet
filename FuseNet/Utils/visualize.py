@@ -36,7 +36,6 @@ import timeit
 from sklearn.metrics import jaccard_score, classification_report, confusion_matrix
 from  skimage.metrics import structural_similarity as ssim
 import skimage
-print(skimage.__version__)
 from keras import losses
 from sklearn.preprocessing import label_binarize
 
@@ -172,15 +171,7 @@ def plot_confusionmatrix(epoch,dir, y_pred,y_testlabel):
     cm=confusion_matrix(y_testlabel, y_pred)
     print('Classification Report')
     target_names = ['healthy', 'Benign', 'malign']
-    print(y_testlabel.shape, y_pred.shape)
     print(classification_report(y_testlabel, y_pred, target_names=target_names))
-    # Classification_Report_file = open(dir+'/losses.txt' , 'a')
-
-    # plt.figure()
-    # plot_confusion_matrix(cm)
-    # dirfile=dir+'/confusion_matrix'
-    # plt.savefig(dirfile+ '-'+'.png' )
-    # plt.close("all")
 
 
     # Normalize the confusion matrix by row (i.e by the number of samples

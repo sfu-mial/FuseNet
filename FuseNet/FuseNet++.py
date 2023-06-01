@@ -27,7 +27,6 @@ from sklearn.metrics import mean_squared_error
 import numpy as np
 from numpy import array
 import skimage
-#print(skimage.__version__)
 from  skimage.metrics import structural_similarity as ssim
 import os
 from sklearn.preprocessing import MinMaxScaler
@@ -163,11 +162,9 @@ def train(epochs, batch_size, alpha,beta,gamma,arch,dir):
     Y_pred, Im_pred_1,Im_pred_2, Im_pred_3,Im_pred_4, Im_pred_f = model.predict([testmeasure_1, testmeasure_2, testmeasure_3, testmeasure_4])
     y_pred = np.argmax(Y_pred, axis=1)
     y_testlabel= np.argmax(label_test,1) 
-    # print(y_testlabel)
-    # print(y_pred)
+
     plot_generated_images(epochs, dir, Im_pred_1,Im_pred_2, Im_pred_3,Im_pred_4, Im_pred_f, x_test,label_test,True)
     plot_confusionmatrix(epochs,dir, y_pred,y_testlabel)
-    # plot_roc_curve(model)
 
 def test(testmeasure_1,testmeasure_2,testmeasure_3,testmeasure_4,x_test ,label_test, dir):
     if arch== 'FuseNet++':
@@ -199,12 +196,9 @@ if __name__ == "__main__":
     gamma = conf['gamma']
     epochs= conf['epochs'] 
     logging.captureWarnings(True)
-    print(arch)
     mode= conf['mode'] 
     dataset_dir = conf['datasetdirectory']
     outputfolder=  conf['outputfolder']
-    print (dataset_dir)
-    print("data loaded")
     if mode == 'train':
         measure_1,measure_2,measure_3,measure_4, x_train, label, testmeasure_1,testmeasure_2,testmeasure_3,testmeasure_4,x_test ,label_test=load_data(dataset_dir)
         train(epochs,batchsize, alpha,beta,gamma,arch,outputfolder)

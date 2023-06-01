@@ -35,7 +35,7 @@ import timeit
 from sklearn.metrics import jaccard_score, classification_report, confusion_matrix
 from  skimage.metrics import structural_similarity as ssim
 import skimage
-print(skimage.__version__)
+# print(skimage.__version__)
 from keras import losses
 from sklearn.preprocessing import label_binarize
 
@@ -84,32 +84,31 @@ def OrthogonalProjectionLoss(features,labels, batch_size, gamma=0.5):
     size = tf.shape(labels)[0]
 
     #  features are normalized
-    features = K.tf.math.l2_normalize(features, 1)#F.normalize(features, p=2, dim=1)
-    print("features {.shape}".format(features))
+    features = K.tf.math.l2_normalize(features, 1)
+    # print("features {.shape}".format(features))
 
-    labels = K.tf.expand_dims(labels,2) #labels[:, None]  # extend dim
-    print("labels {.shape}".format(labels))
+    labels = K.tf.expand_dims(labels,2)  # extend dim
+    # print("labels {.shape}".format(labels))
 
-    mask= (K.tf.equal(labels,K.transpose (labels)))  #torch.eq(labels, labels.t()).bool().to(device)
-    print("mask {.shape}".format(mask))
+    mask= (K.tf.equal(labels,K.transpose (labels)))  
+    # print("mask {.shape}".format(mask))
     eye= tf.cast(K.tf.eye(size,3), tf.bool)
     eye_t= ~eye
-    # eye =K.tf.eye(batch_size])# torch.eye(mask.shape[0], mask.shape[1]).bool().to(device)
-    print("eye {.shape}".format(eye))
-    mask_pos = tf.cast(tf.linalg.set_diag( mask, eye_t), tf.float32)#(mask,eye, tf.zeros_like(eye))#, eye)#mask.masked_fill(eye, 0).float()
-    print("mask_pos {.shape}".format(mask_pos))
+    # print("eye {.shape}".format(eye))
+    mask_pos = tf.cast(tf.linalg.set_diag( mask, eye_t), tf.float32)
+    # print("mask_pos {.shape}".format(mask_pos))
     mask_neg = tf.cast((~mask), tf.float32)
-    print("mask_neg {.shape}".format(mask_neg))
+    # print("mask_neg {.shape}".format(mask_neg))
     dot_prod =K.dot(features, K.transpose (features))
-    print("dot_prod {.shape}".format(dot_prod))
+    # print("dot_prod {.shape}".format(dot_prod))
     # dot_prod = K.tf.expand_dims(dot_prod,2) 
     pos_pairs_mean =K.abs( K.sum(tf.linalg.matmul (mask_pos , dot_prod)) / K.sum (mask_pos + 1e-6))
-    print("pos_pairs_mean {.shape}".format(pos_pairs_mean))
+    # print("pos_pairs_mean {.shape}".format(pos_pairs_mean))
 
     neg_pairs_mean =K.abs( K.sum(tf.matmul(mask_neg , dot_prod))/ K.sum(mask_neg + 1e-6))
-    print("neg_pairs_mean {.shape}".format(neg_pairs_mean))
+    # print("neg_pairs_mean {.shape}".format(neg_pairs_mean))
     loss = (1.0 - pos_pairs_mean) + gamma * neg_pairs_mean
-    print("loss {.shape}".format(loss))
+    # print("loss {.shape}".format(loss))
 
     return loss
 
@@ -174,7 +173,6 @@ def dst_transform(y_true, y_pred):
     size= K.int_shape(y_true)[0]
     if (size is None):
         size= 1
-        print("here")
     for i in range(size):
 #         print("y_true {.shape}".format(y_true))
 
@@ -209,7 +207,6 @@ def dst_transform(y_true, y_pred):
         result_true = K.tf.cond(is_empty_gt, lambda: dist_trans_true, lambda: result_t/128)
     
 # ###### dist_transform for y_pred#####
-#     y_pred_mask_f = K.cast(K.greater_equal(y_pred_f,K.mean(y_pred)), dtype='float64')
         y_pred_mask_f = K.cast(K.greater(pred_batch_c,(K.mean(pred_batch_c)+K.std(pred_batch_c))), dtype='float32')
         ones_pred= K.tf.where(K.tf.greater_equal(y_pred_mask_f,1))
 #     print("ones_true {.shape}".format(ones_true))
@@ -286,7 +283,7 @@ def custom_loss(y_true, y_pred, alpha, Beta,batch_size,feature, gamma):
     loss= weighted_categorical_crossentropy(y_true, y_pred,weights)
     # loss=categorical_focal_loss(y_true, y_pred, alpha=[[.25, .25, .25]], gamma=2.)
     loss +=0.5*OrthogonalProjectionLoss(feature ,y_true, batch_size, gamma=0.5) 
-    return  1+loss/2
+    return  2+loss/2
 
 def loss_r(alpha, Beta,batch_size):
     def custom_loss_func_r(y_true, y_pred):
