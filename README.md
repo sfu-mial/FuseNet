@@ -54,26 +54,16 @@ python3 FuseNet++.py -h
 export CUDA_VISIBLE_DEVICES=0 #or change to your GPU config
 mkdir myoutput
 cd FuseNet
-python3 FuseNet++.py --epochs 10 --outputfolder ../myoutput
-```
-This will train the network and save output in `myoutput`.
-Examples of outputs are presented in [Figures](FuseNet/Figures) 
-<!--![images/reconst](FuseNet/Images/test_generated_image-19.png?=100x100)-->
-#### Evaluation
-For evaluation, put all your test measurments in a folder and set it path as an argument. Then run the following command:
+python3 FuseNet++.py --epochs 100 --outputfolder ../myoutput.       #for joint reconstruction and diagnosis model
+#or
+python3 RawToTask++.py --epochs 100 --outputfolder ../myoutput      #for direct prediction model
 
-<a name="Evaluation"></a>
-```bash
-mkdir myoutput
-cd FuseNet
-python3 FuseNet++.py  --input testdatadir --outputfolder ../myoutput  --mode test
 ```
-
 This will show something like:
 ```bash
 [FuseNet++.py:100 -          initializer() ] Writing output in /dev/shm/FuseNet/FuseNet/../myoutput
 [FuseNet++.py:101 -          initializer() ] Logging directory /dev/shm/FuseNet/FuseNet/../myoutput
-[FuseNet++.py:104 -          initializer() ] CONF::		 epochs -> 10
+[FuseNet++.py:104 -          initializer() ] CONF::		 epochs -> 100
 [FuseNet++.py:104 -          initializer() ] CONF::		 loss -> mse
 [FuseNet++.py:104 -          initializer() ] CONF::		 lr -> 0.0001
 [FuseNet++.py:104 -          initializer() ] CONF::		 seed -> 2
@@ -91,10 +81,23 @@ This will show something like:
 [FuseNet++.py:104 -          initializer() ] CONF::		 outputdirectory -> /dev/shm/FuseNet/FuseNet/../myoutput
 [FuseNet++.py:104 -          initializer() ] CONF::		 logdir -> /dev/shm/FuseNet/FuseNet/../myoutput
 ...
-Train on 1939 samples, validate on 216 samples
-Epoch 1/10
+Epoch 1/100
   16/1939 [..............................] - ETA: 34:23 - loss: 19.4238
 ```
+
+This will train the network and save output in `myoutput`.
+Examples of outputs are presented in [Figures](FuseNet/Figures) 
+<!--![images/reconst](FuseNet/Images/test_generated_image-19.png?=100x100)-->
+#### Evaluation
+For evaluation, put all your test measurments in a folder and set it path as an argument. Then run the following command:
+
+<a name="Evaluation"></a>
+```bash
+mkdir myoutput
+cd FuseNet
+python3 FuseNet++.py  --input testdatadir --outputfolder ../myoutput  --mode test
+```
+
 
 
 The results will be saved output in `myoutput`.
