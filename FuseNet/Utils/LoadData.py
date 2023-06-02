@@ -57,17 +57,17 @@ def load_data(direc):
      measure_750= np.concatenate((measure3,measure4), axis=0)
 
 
+
      path3 =  direc+train_dirc2+'/'+'benign/690/csv' 
      measure3=loadmeasure(path3)
-
      path4 =  direc+train_dirc2+'/'+'malignant/690/csv' 
      measure4=loadmeasure(path4)
-  
+
      measure_690= np.concatenate((measure3,measure4), axis=0)
+
 
      path3 =  direc+train_dirc2+'/'+'benign/800/csv'  
      measure3=loadmeasure(path3)
-
      path4 =  direc+train_dirc2+'/'+'malignant/800/csv' 
      measure4=loadmeasure(path4)
   
@@ -136,6 +136,7 @@ def load_data(direc):
      label=np.where((label)==3, 2, label)
      label_test=np.where((label_test)==3, 2, label_test)
 
+     measure_690,measure_750,measure_800,measure_850, immatrix, label= augmentdata(measure_690,measure_750,measure_800,measure_850, immatrix, label)
 
      X_train_690,X_train_750,X_train_800,X_train_850,y_train,Y_label = shuffle(measure_690,measure_750,measure_800,measure_850, immatrix, label, random_state=2) 
 
@@ -176,3 +177,18 @@ def preprocess(X_train_690,X_train_750,X_train_800,X_train_850,y_train,Y_label,X
 
 
      return x_train_1, x_train_2, x_train_3, x_train_4, y_train, y_label, x_test_1, x_test_2, x_test_3, x_test_4, y_test, y_testlabel
+def augmentdata(measure_690,measure_750,measure_800,measure_850, immatrix, label):
+
+     reverse_immatrix=immatrix[:,:,::-1] #np.fliplr(immatrix)
+     immatrix= np.concatenate((immatrix,reverse_immatrix), axis=0)
+     label= np.concatenate((label,label), axis=0)
+     reverse_measure_750=measure_750[...,::-1] 
+     measure_750= np.concatenate((measure_750,reverse_measure_750), axis=0)
+     reverse_measure_690=measure_690[...,::-1] 
+     measure_690= np.concatenate((measure_690,reverse_measure_690), axis=0)
+     reverse_measure_800=measure_800[...,::-1] 
+     measure_800= np.concatenate((measure_800,reverse_measure_800), axis=0)
+     reverse_measure_850=measure_850[...,::-1] 
+     measure_850= np.concatenate((measure_850,reverse_measure_850), axis=0)
+
+     return measure_690,measure_750,measure_800,measure_850, immatrix, label
