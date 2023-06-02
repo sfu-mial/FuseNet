@@ -148,12 +148,12 @@ def train(epochs, batch_size, alpha,beta,gamma,orth,dir):
     # plot_roc_curve(model)
 def test(testmeasure_1,testmeasure_2,testmeasure_3,testmeasure_4,x_test ,label_test):
     if orth :#arch== 'Raw-to-task++':
-        pathRTT= '/local-scratch/Hanene/DOT_model_2019/new/rnn/MFDL/R_To_T/best_RTT_results_GN_persensor_lr/deep_spa_mse_only.h5'
+        pathRTT= '../weight/RTT++.h5'
         RTT_model= load_model(pathRTT,compile=False)
         Y_pred = RTT_model.predict([testmeasure_1[1:2,:], testmeasure_2[1:2,:], testmeasure_3[1:2,:],testmeasure_4[1:2,:]])
 
     else :# arch== 'Raw-to-task':
-        pathRTT= '/local-scratch/Hanene/DOT_model_2019/new/rnn/MFDL/R_To_T/results_ce_only_adjusted_fusin_skip0/deep_spa_mse_only.h5'
+        pathRTT= '../weight/RTT.h5'
         RTTCE_model= load_model(pathRTT,compile=False)
         Y_pred = RTTCE_model.predict([testmeasure_1[1:2,:], testmeasure_2[1:2,:], testmeasure_3[1:2,:],testmeasure_4[1:2,:]])
     y_pred = np.argmax(Y_pred, axis=1)
