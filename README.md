@@ -5,6 +5,7 @@ Identifying breast cancer lesions with a portable diffuse optical tomography (DO
 To accurately capture the highly heterogeneous tissue of a cancer lesion embedded in healthy breast tissue with non-invasive DOT, multiple frequencies can be combined to optimize signal penetration and reduce sensitivity to noise.
 We show that an orthogonal multi-frequency DOT fusion can improve reconstruction and leads to more accurate end-to-end identification of malignant from benign lesions and healthy tissue, illustrating its regularization properties on the multi-frequency input space. Furthermore, we investigates the merits of tackling the diagnosis prediction task from raw sensor data directly without image reconstruction in DOT (direct prediction) and highlighs the potential of the raw-to-task model for improved accuracy, while reducing computational complexity.
 ![Fig1_TMI2](Images/Fig1_TMI2.png)
+Typical breast cancer screening workflow. (A) Images reconstructed by an inverse model, from signals collected by the acquisition hardware, are analyzed for assessment, diagnosis, and treatment prognosis. (B) Screening pipelines can be divided into two paradigms: (i) Accurate reconstruction followed by image based classification. (ii) A direct prediction model omits image reconstruction to focus solely on the ultimate task and can help overcome sub-task errors, e.g., reconstruction induced false positives, marked by red triangles in this scenario, in paradigm (i)
 ## Keywords
 Diffuse optical tomography, image reconstruction, deep learning, multi-frequency, tissue estimation, lesion classification, diagnosis, multitask learning, transfer learning, handheld probe.
 ## Citation
@@ -47,7 +48,6 @@ For quick hints about commands:
 cd FuseNet
 python3 FuseNet++.py -h
 ```
-
 #### Training
 <a name="Training"></a>
 ```bash
@@ -56,7 +56,7 @@ mkdir myoutput
 cd FuseNet
 python3 FuseNet++.py --epochs 100 --outputfolder ../myoutput.       #for joint reconstruction and diagnosis model
 #or
-python3 RawToTask++.py --epochs 100 --outputfolder ../myoutput      #for direct prediction model
+python3 RawToTask++.py --epochs 100 --orth False --outputfolder ../myoutput      #for direct prediction model with disabled orthogonal fusion (Raw-To-Task)
 
 ```
 This will show something like:
@@ -68,7 +68,7 @@ This will show something like:
 [FuseNet++.py:104 -          initializer() ] CONF::		 lr -> 0.0001
 [FuseNet++.py:104 -          initializer() ] CONF::		 seed -> 2
 [FuseNet++.py:104 -          initializer() ] CONF::		 device -> gpu
-[FuseNet++.py:104 -          initializer() ] CONF::		 arch -> FuseNet++
+[FuseNet++.py:104 -          initializer() ] CONF::		 orth -> True
 [FuseNet++.py:104 -          initializer() ] CONF::		 batchsize -> 16
 [FuseNet++.py:104 -          initializer() ] CONF::		 alpha -> 0.2
 [FuseNet++.py:104 -          initializer() ] CONF::		 beta -> 0.25
@@ -95,10 +95,9 @@ For evaluation, put all your test measurments in a folder and set it path as an 
 ```bash
 mkdir myoutput
 cd FuseNet
+wget https://vault.sfu.ca/index.php/s/4fLjIzqNtvEAN31 # download model weights
 python3 FuseNet++.py  --input testdatadir --outputfolder ../myoutput  --mode test
 ```
-
-
 
 The results will be saved output in `myoutput`.
 ### Questions?
