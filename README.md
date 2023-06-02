@@ -95,11 +95,10 @@ For evaluation, put all your test measurments in a folder and set it path as an 
 ```bash
 mkdir myoutput
 cd FuseNet
-wget https://vault.sfu.ca/index.php/s/4fLjIzqNtvEAN31 # download model weights
 python3 FuseNet++.py  --input testdatadir --outputfolder ../myoutput  --mode test
 ```
 
-The results will be saved output in `myoutput`.
+The results will be saved output in `myoutput`. Pretrained models weights can be found [here](https://vault.sfu.ca/index.php/s/4fLjIzqNtvEAN31).
 ### Questions?
 <a name="faq"></a>
 Please create a [new issue](https://github.com/haneneby/FuseNet/issues/new/choose)  detailing concisely, yet complete what issue you encountered, in a reproducible way.
