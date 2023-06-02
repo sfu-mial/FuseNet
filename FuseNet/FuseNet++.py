@@ -63,7 +63,7 @@ if not os.path.exists(final_directory):
 
 def initializer(name=None,logs={}):
         global lgr
-        configuration = {'epochs':25,'loss':'mse', 'lr':0.0001, 'seed':2, 'device':'gpu', 'arch':'FuseNet++', 'batchsize':16, 'alpha':0.2, 'beta':0.25, 'gamma':0.5, 
+        configuration = {'epochs':25,'loss':'mse', 'lr':0.0001, 'seed':2, 'device':'gpu', 'orth': True, 'batchsize':16, 'alpha':0.2, 'beta':0.25, 'gamma':0.5, 
                   'checkpoint': None, 'datasetdirectory':'./data/data_samples/', 'outputfolder': "results", 'checkpointdirectory':'.', 'mode':'train'}
 
         
@@ -72,7 +72,7 @@ def initializer(name=None,logs={}):
         parser.add_argument('--batchsize', type=int, nargs='?', help='Int, >0, batchsize, default 16')
         parser.add_argument('--outputfolder', type=str, nargs='?', help='Output folder')
         parser.add_argument('--mode', type=str, nargs='?', help='train [def], test')
-        parser.add_argument('--arch', type=str, nargs='?', help='FuseNet++ [def], FuseNet')
+        parser.add_argument('--orth', type=bool, nargs='?', help='Enable orthogonal loss: True [def] for FuseNet++, False for FuseNet')
         parser.add_argument('--datasetdirectory', type=str, nargs='?', help='Path where dataset is stored')
         parser.add_argument('--lr', type=float, nargs='?', help='Float, >0, Learning Rate, default 0.0001')
         # parser.add_argument('--checkpointdirectory', type=str, nargs='?', help='checkpoint directory to resume')
@@ -108,7 +108,7 @@ def initializer(name=None,logs={}):
         return configuration
 
 
-def train(epochs, batch_size, alpha,beta,gamma,arch,dir):
+def train(epochs, batch_size, alpha,beta,gamma,orth,dir):
     alpha = K.variable(alpha)
     beta = K.variable(beta)
     gamma = K.variable(gamma)
@@ -121,7 +121,7 @@ def train(epochs, batch_size, alpha,beta,gamma,arch,dir):
     feature_cla, model = Models(shape).JRD_model()
     model_loss_fuse= loss(alpha, beta,batch_size,feature_cla,gamma)
     model_loss= loss_r(alpha, beta,batch_size) 
-    if arch== 'FuseNet++':
+    if orth: # arch== 'FuseNet++':
  
         model.compile(   
             loss = 
@@ -138,7 +138,7 @@ def train(epochs, batch_size, alpha,beta,gamma,arch,dir):
             optimizer=tf.keras.optimizers.Adam(0.0001, beta_1=0.9, beta_2=0.98,
                                      epsilon=1e-9)
         )
-    elif arch== 'FuseNet':
+    else: #if arch== 'FuseNet':
         feature_cla, model = Models(shape).JRD_model()
         model_loss_fuse= loss(alpha, beta,batch_size,feature_cla,gamma)
         model_loss= loss_r(alpha, beta,batch_size) 
@@ -167,14 +167,14 @@ def train(epochs, batch_size, alpha,beta,gamma,arch,dir):
     plot_confusionmatrix(epochs,dir, y_pred,y_testlabel)
 
 def test(testmeasure_1,testmeasure_2,testmeasure_3,testmeasure_4,x_test ,label_test, dir):
-    if arch== 'FuseNet++':
+    if orth: # arch== 'FuseNet++':
         path=  './weight/JRD++.h5'
         # '/local-scratch/Hanene/DOT_model_2019/new/rnn/MFDL/new_fusion_orth/Best_results_GNnoise_mean_Std_fuse_orth/deep_spa_mse_only.h5'
         RTRD_model= load_model(path,compile=False)#, custom_objects={'custom_loss_func': loss})
         Y_pred, Im_pred_1,Im_pred_2, Im_pred_3,Im_pred_4, Im_pred_f = RTRD_model.predict([testmeasure_1[1:2,:], testmeasure_2[1:2,:], testmeasure_3[1:2,:],testmeasure_4[1:2,:]])
 
 
-    elif arch== 'FuseNet':
+    else: # if arch== 'FuseNet':
         path= '/local-scratch/Hanene/DOT_model_2019/new/rnn/MFDL/new_fusion_orth/results_fuse_only/deep_spa_mse_only.h5'
         RTRD_notorth_model= load_model(path,compile=False)#, custom_objects={'custom_loss_func': loss})
         Y_pred, Im_pred_1,Im_pred_2, Im_pred_3,Im_pred_4, Im_pred_f = RTRD_notorth_model.predict([testmeasure_1[1:2,:], testmeasure_2[1:2,:], testmeasure_3[1:2,:],testmeasure_4[1:2,:]])
@@ -188,7 +188,7 @@ def test(testmeasure_1,testmeasure_2,testmeasure_3,testmeasure_4,x_test ,label_t
 
 if __name__ == "__main__":
     conf=initializer()
-    arch=conf['arch']
+    orth=conf['orth']
     batchsize= conf['batchsize']  
     lgr=conf['logger']
     alpha =conf['alpha']
@@ -201,7 +201,7 @@ if __name__ == "__main__":
     outputfolder=  conf['outputfolder']
     if mode == 'train':
         measure_1,measure_2,measure_3,measure_4, x_train, label, testmeasure_1,testmeasure_2,testmeasure_3,testmeasure_4,x_test ,label_test=load_data(dataset_dir)
-        train(epochs,batchsize, alpha,beta,gamma,arch,outputfolder)
+        train(epochs,batchsize, alpha,beta,gamma,orth,outputfolder)
     elif mode == 'test':
         testmeasure_1, testmeasure_2, testmeasure_3, testmeasure_4, x_test ,label_test=load_data_t(dataset_dir)
         test(testmeasure_1,testmeasure_2,testmeasure_3,testmeasure_4,x_test ,label_test,outputfolder)

@@ -64,7 +64,7 @@ if not os.path.exists(final_directory):
 
 def initializer(name=None,logs={}):
         global lgr
-        configuration = {'epochs':25,'loss':'mse', 'lr':0.0001, 'seed':2, 'device':'gpu', 'arch':'Raw-to-task++', 'batchsize':16, 'alpha':0.2, 'beta':0.25, 'gamma':0.5, 
+        configuration = {'epochs':25,'loss':'mse', 'lr':0.0001, 'seed':2, 'device':'gpu', 'orth': True, 'batchsize':16, 'alpha':0.2, 'beta':0.25, 'gamma':0.5, 
                   'checkpoint': None, 'datasetdirectory':'./data/data_samples/', 'outputfolder': "results", 'checkpointdirectory':'.', 'mode':'train'}
 
         
@@ -73,7 +73,7 @@ def initializer(name=None,logs={}):
         parser.add_argument('--batchsize', type=int, nargs='?', help='Int, >0, batchsize, default 16')
         parser.add_argument('--outputfolder', type=str, nargs='?', help='Output folder')
         parser.add_argument('--mode', type=str, nargs='?', help='train [def], test')
-        parser.add_argument('--arch', type=str, nargs='?', help='Raw-to-task++ [def], Raw-to-task')
+        parser.add_argument('--orth', type=bool, nargs='?', help='Enable orthogonal loss: True [def] for Raw-to-task++, False for Raw-to-task')
         parser.add_argument('--datasetdirectory', type=str, nargs='?', help='Path where dataset is stored')
         parser.add_argument('--lr', type=float, nargs='?', help='Float, >0, Learning Rate, default 0.0001')
         # parser.add_argument('--checkpointdirectory', type=str, nargs='?', help='checkpoint directory to resume')
@@ -109,7 +109,7 @@ def initializer(name=None,logs={}):
         return configuration
 
 
-def train(epochs, batch_size, alpha,beta,gamma,arch,dir):
+def train(epochs, batch_size, alpha,beta,gamma,orth,dir):
     alpha = K.variable(alpha)
     beta = K.variable(beta)
     gamma = K.variable(gamma)
@@ -121,14 +121,14 @@ def train(epochs, batch_size, alpha,beta,gamma,arch,dir):
     checkpoint = ModelCheckpoint(filepath, verbose=1,  monitor='val_accuracy', save_weights_only=True, save_best_only=True, mode='max')
     feature_cla, model = Models(shape).RTT_model()
     model_loss_fuse= loss(alpha, beta,batch_size,feature_cla,gamma)
-    if arch== 'Raw-to-task++':
+    if orth: # arch== 'Raw-to-task++':
  
         model.compile(   
             loss =  { "category_output":  model_loss_fuse },
             metrics = {"category_output": 'accuracy' },
             optimizer=tf.keras.optimizers.Adam(0.0001, beta_1=0.9, beta_2=0.98, epsilon=1e-9)
         )
-    elif arch== 'Raw-to-task':
+    else: #arch=='Raw-to-task':
         feature_cla, model = Models(shape).RTT_model()
         model_loss_fuse= loss(alpha, beta,batch_size,feature_cla,gamma)
         model_loss= loss_r(alpha, beta,batch_size) 
@@ -147,12 +147,12 @@ def train(epochs, batch_size, alpha,beta,gamma,arch,dir):
     plot_confusionmatrix(epochs,dir, y_pred,y_testlabel)
     # plot_roc_curve(model)
 def test(testmeasure_1,testmeasure_2,testmeasure_3,testmeasure_4,x_test ,label_test):
-    if arch== 'Raw-to-task++':
+    if orth :#arch== 'Raw-to-task++':
         pathRTT= '/local-scratch/Hanene/DOT_model_2019/new/rnn/MFDL/R_To_T/best_RTT_results_GN_persensor_lr/deep_spa_mse_only.h5'
         RTT_model= load_model(pathRTT,compile=False)
         Y_pred = RTT_model.predict([testmeasure_1[1:2,:], testmeasure_2[1:2,:], testmeasure_3[1:2,:],testmeasure_4[1:2,:]])
 
-    elif arch== 'Raw-to-task':
+    else :# arch== 'Raw-to-task':
         pathRTT= '/local-scratch/Hanene/DOT_model_2019/new/rnn/MFDL/R_To_T/results_ce_only_adjusted_fusin_skip0/deep_spa_mse_only.h5'
         RTTCE_model= load_model(pathRTT,compile=False)
         Y_pred = RTTCE_model.predict([testmeasure_1[1:2,:], testmeasure_2[1:2,:], testmeasure_3[1:2,:],testmeasure_4[1:2,:]])
@@ -164,7 +164,7 @@ def test(testmeasure_1,testmeasure_2,testmeasure_3,testmeasure_4,x_test ,label_t
 
 if __name__ == "__main__":
     conf=initializer()
-    arch=conf['arch']
+    orth=conf['orth']
     batchsize= conf['batchsize']  
     lgr=conf['logger']
     alpha =conf['alpha']
@@ -178,7 +178,7 @@ if __name__ == "__main__":
     # print (dataset_dir)
     if mode == 'train':
         measure_1,measure_2,measure_3,measure_4, x_train, label, testmeasure_1,testmeasure_2,testmeasure_3,testmeasure_4,x_test ,label_test=load_data(dataset_dir)
-        train(epochs,batchsize, alpha,beta,gamma,arch,outputfolder)
+        train(epochs,batchsize, alpha,beta,gamma,orth,outputfolder)
     elif mode == 'test':
         testmeasure_1,testmeasure_2,testmeasure_3,testmeasure_4,x_test ,label_test=load_data_t(dataset_dir)
         test(testmeasure_1,testmeasure_2,testmeasure_3,testmeasure_4,x_test ,label_test)
