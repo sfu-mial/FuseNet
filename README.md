@@ -89,7 +89,7 @@ This will train the network and save output in `myoutput`.
 Examples of outputs are presented in [Figures](FuseNet/Figures) 
 <!--![images/reconst](FuseNet/Images/test_generated_image-19.png?=100x100)-->
 #### Evaluation
-For evaluation, put all your test measurments in a folder and set it path as an argument. Then run the following command:
+For evaluation, put all your test measurments in a folder and set it path as an argument. Examples are available under [data_samples](FuseNet/data). Then run the following command:
 
 <a name="Evaluation"></a>
 ```bash
