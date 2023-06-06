@@ -64,14 +64,12 @@ This will show something like:
 [FuseNet++.py:100 -          initializer() ] Writing output in /dev/shm/FuseNet/FuseNet/../myoutput
 [FuseNet++.py:101 -          initializer() ] Logging directory /dev/shm/FuseNet/FuseNet/../myoutput
 [FuseNet++.py:104 -          initializer() ] CONF::		 epochs -> 100
-[FuseNet++.py:104 -          initializer() ] CONF::		 loss -> mse
 [FuseNet++.py:104 -          initializer() ] CONF::		 lr -> 0.0001
 [FuseNet++.py:104 -          initializer() ] CONF::		 seed -> 2
 [FuseNet++.py:104 -          initializer() ] CONF::		 device -> gpu
 [FuseNet++.py:104 -          initializer() ] CONF::		 orth -> True
 [FuseNet++.py:104 -          initializer() ] CONF::		 batchsize -> 16
-[FuseNet++.py:104 -          initializer() ] CONF::		 alpha -> 0.2
-[FuseNet++.py:104 -          initializer() ] CONF::		 beta -> 0.25
+[FuseNet++.py:104 -          initializer() ] CONF::		 beta -> 0.2
 [FuseNet++.py:104 -          initializer() ] CONF::		 gamma -> 0.5
 [FuseNet++.py:104 -          initializer() ] CONF::		 checkpoint -> None
 [FuseNet++.py:104 -          initializer() ] CONF::		 datasetdirectory -> ./data/data_samples/
