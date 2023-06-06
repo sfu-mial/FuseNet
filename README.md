@@ -64,14 +64,12 @@ This will show something like:
 [FuseNet++.py:100 -          initializer() ] Writing output in /dev/shm/FuseNet/FuseNet/../myoutput
 [FuseNet++.py:101 -          initializer() ] Logging directory /dev/shm/FuseNet/FuseNet/../myoutput
 [FuseNet++.py:104 -          initializer() ] CONF::		 epochs -> 100
-[FuseNet++.py:104 -          initializer() ] CONF::		 loss -> mse
 [FuseNet++.py:104 -          initializer() ] CONF::		 lr -> 0.0001
 [FuseNet++.py:104 -          initializer() ] CONF::		 seed -> 2
 [FuseNet++.py:104 -          initializer() ] CONF::		 device -> gpu
 [FuseNet++.py:104 -          initializer() ] CONF::		 orth -> True
 [FuseNet++.py:104 -          initializer() ] CONF::		 batchsize -> 16
-[FuseNet++.py:104 -          initializer() ] CONF::		 alpha -> 0.2
-[FuseNet++.py:104 -          initializer() ] CONF::		 beta -> 0.25
+[FuseNet++.py:104 -          initializer() ] CONF::		 beta -> 0.2
 [FuseNet++.py:104 -          initializer() ] CONF::		 gamma -> 0.5
 [FuseNet++.py:104 -          initializer() ] CONF::		 checkpoint -> None
 [FuseNet++.py:104 -          initializer() ] CONF::		 datasetdirectory -> ./data/data_samples/
@@ -89,7 +87,7 @@ This will train the network and save output in `myoutput`.
 Examples of outputs are presented in [Figures](FuseNet/Figures) 
 <!--![images/reconst](FuseNet/Images/test_generated_image-19.png?=100x100)-->
 #### Evaluation
-For evaluation, put all your test measurments in a folder and set it path as an argument. Then run the following command:
+For evaluation, put all your test measurments in a folder and set it path as an argument.Examples are available under [data_samples](FuseNet/data). Then run the following command:
 
 <a name="Evaluation"></a>
 ```bash
