@@ -292,8 +292,8 @@ def loss_r(alpha, Beta,batch_size):
 
 def custom_loss_r(y_true, y_pred, alpha, Beta,batch_size):  
     loss =losses.mean_squared_error(y_true, y_pred)
-    loss+= Beta*FuzzyJaccard_distance_loss(y_true, y_pred)
-    loss +=alpha* dst_transform(y_true, y_pred)
+    loss+= alpha *FuzzyJaccard_distance_loss(y_true, y_pred)
+    loss += Beta* dst_transform(y_true, y_pred)
 
     return  loss
 

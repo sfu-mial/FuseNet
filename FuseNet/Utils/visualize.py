@@ -42,7 +42,7 @@ from sklearn.preprocessing import label_binarize
 global Tmp_ssimlist
 Tmp_ssimlist = 0
 
-def plot_generated_images(epoch, dir,generated_image_1 ,generated_image_2, generated_image_3 ,generated_image_4, generated_image_f, x_train, GT_label,val =True, examples=20, dim=(1, 6), figsize=(10, 5)):
+def plot_generated_images(epoch, dir,generated_image_1 ,generated_image_2, generated_image_3 ,generated_image_4, generated_image_f, x_train, GT_label,val =True, examples=120, dim=(1, 6), figsize=(10, 5)):
     fg_color = 'black'
     bg_color =  'white'
     DistanceROI = []
@@ -53,6 +53,7 @@ def plot_generated_images(epoch, dir,generated_image_1 ,generated_image_2, gener
     FJaccard=[]
     vmin=0
     vmax=25
+    scale = np.array(100)  
     # PD_label=[]
     # GT_label=[]
     global Tmp_ssimlist
@@ -66,7 +67,7 @@ def plot_generated_images(epoch, dir,generated_image_1 ,generated_image_2, gener
             fig=plt.figure(figsize=figsize)
             ax1=plt.subplot(dim[0], dim[1], 1)
             ax1.set_title('GT', color=fg_color)
-            imgn = np.flipud(x_train[index]) 
+            imgn = np.flipud(x_train[index])/scale 
             im1 = ax1.imshow(imgn.reshape(128, 128))  
             divider = make_axes_locatable(ax1)
             cax = divider.append_axes('right', size='5%', pad=0.05)
@@ -75,7 +76,7 @@ def plot_generated_images(epoch, dir,generated_image_1 ,generated_image_2, gener
 
             ## plot Rec1
             ax2=plt.subplot(dim[0], dim[1], 2)
-            imgnr = np.flipud(generated_image_1[index]) 
+            imgnr = np.flipud(generated_image_1[index])/scale 
             ax2.set_title('Recons_f1', color=fg_color)
             im2=plt.imshow(imgnr.reshape(128, 128))
             divider = make_axes_locatable(ax2)
@@ -85,7 +86,7 @@ def plot_generated_images(epoch, dir,generated_image_1 ,generated_image_2, gener
 
             ## plot Rec2
             ax3=plt.subplot(dim[0], dim[1], 3)
-            imgnr = np.flipud(generated_image_2[index]) 
+            imgnr = np.flipud(generated_image_2[index])/scale 
             ax3.set_title('Recons_f2', color=fg_color)
             im2=plt.imshow(imgnr.reshape(128, 128))
             divider = make_axes_locatable(ax3)
@@ -95,7 +96,7 @@ def plot_generated_images(epoch, dir,generated_image_1 ,generated_image_2, gener
 
             ## plot Rec3
             ax4=plt.subplot(dim[0], dim[1], 4)
-            imgnr = np.flipud(generated_image_3[index]) 
+            imgnr = np.flipud(generated_image_3[index])/scale 
             ax4.set_title('Recons_f3', color=fg_color)
             im2=plt.imshow(imgnr.reshape(128, 128))
             divider = make_axes_locatable(ax4)
@@ -105,7 +106,7 @@ def plot_generated_images(epoch, dir,generated_image_1 ,generated_image_2, gener
 
             ## plot Rec4
             ax5=plt.subplot(dim[0], dim[1], 5)
-            imgnr = np.flipud(generated_image_4[index]) 
+            imgnr = np.flipud(generated_image_4[index])/scale 
             ax5.set_title('Recons_f4', color=fg_color)
             im2=plt.imshow(imgnr.reshape(128, 128))
             divider = make_axes_locatable(ax5)
@@ -115,7 +116,7 @@ def plot_generated_images(epoch, dir,generated_image_1 ,generated_image_2, gener
 
             ## plot Rec_fusion
             ax6=plt.subplot(dim[0], dim[1], 6)
-            imgnr = np.flipud(generated_image_f[index]) 
+            imgnr = np.flipud(generated_image_f[index])/scale 
             ax6.set_title('Recons_all', color=fg_color)
             im2=plt.imshow(imgnr.reshape(128, 128))
             divider = make_axes_locatable(ax6)
