@@ -72,7 +72,7 @@ def load_data_t(direc):
      measure1=loadmeasure(path1)
      path1 = direc+train_dirc+'/'+'malignant/850/csv'
      measure2=loadmeasure(path1)
-     testmeasure_850= np.concatenate((measure1,measure2), axis=0) 
+     testmeasure_850=  np.concatenate((measure1,measure2), axis=0) 
 
      label_test=np.where((label_test)==2, 1, label_test)
 
