@@ -12,7 +12,7 @@ Diffuse optical tomography, image reconstruction, deep learning, multi-frequency
 <a name="Cite"></a>
 ```bibtext
 @article{ben2022orthogonal,
-  title={Orthogonal Multi-frequency Fusion Based Image Reconstruction and Diagnosis in Diffuse Optical Tomography},
+  title={Deep Orthogonal Multi-Frequency Fusion for Tomogram-Free Diagnosis in Diffuse Optical Imaging},
   author={Ben Yedder, Hanene and Cardoen, Ben and Shokoufi, Majid and Golnaraghi, Farid and Hamarneh, Ghassan},
   year={2022},
   publisher={TechRxiv}
